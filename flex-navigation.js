@@ -1,5 +1,5 @@
 /* 彈性頁：四大地區 → 四大分類 → 詳細資料
- * 修正版：直接讀取 patch.js + 彈性新增店家資料，確保所有新增資料實際出現在彈性頁。
+ * 修正版：直接讀取 patch.js + 彈性新增店家資料，確保所有資料實際出現在彈性頁。
  */
 (function(){
 'use strict';
@@ -23,7 +23,10 @@ function regionOf(r){
  return null;
 }
 function catOf(r){
- const t=(r.cat||'')+' '+(r.name||'')+' '+(r.jp||'')+' '+(r.menu||'');
+ const explicit=String(r.cat||'');
+ if(/酒|日本酒|燒酎|焼酎|沙瓦|bar|pub|居酒屋|beer|啤酒|精釀/i.test(explicit))return 'bar';
+ if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert|パフェ|タルト|gelato|冰淇淋|ソフトクリーム/i.test(explicit))return 'sweet';
+ const t=(r.name||'')+' '+(r.jp||'')+' '+(r.menu||'');
  if(/酒|日本酒|燒酎|焼酎|沙瓦|bar|pub|居酒屋|beer|啤酒|精釀/i.test(t))return 'bar';
  if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert|パフェ|タルト|gelato|冰淇淋|ソフトクリーム/i.test(t))return 'sweet';
  return 'savory';
@@ -31,21 +34,49 @@ function catOf(r){
 function maps(n,a){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n+' '+a)}
 function escapeHtml(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]))}
 
+/* 以括號深度解析 patch.js 的 flexRestaurants 陣列，避免依賴容易失效的 regex 結尾標記。 */
+function extractFlexArray(text){
+ const marker='const flexRestaurants';
+ const start=text.indexOf(marker);
+ if(start<0)return [];
+ const open=text.indexOf('[',start);
+ if(open<0)return [];
+ let depth=0,quote=null,escaped=false;
+ for(let i=open;i<text.length;i++){
+   const ch=text[i];
+   if(quote){
+     if(escaped){escaped=false;continue;}
+     if(ch==='\\'){escaped=true;continue;}
+     if(ch===quote)quote=null;
+     continue;
+   }
+   if(ch==='"'||ch==="'"||ch==='`'){quote=ch;continue}
+   if(ch==='[')depth++;
+   else if(ch===']'){
+     depth--;
+     if(depth===0){
+       const source=text.slice(open,i+1);
+       try{return Function('return '+source)()||[]}catch(err){console.error('flex array parse failed',err);return []}
+     }
+   }
+ }
+ return [];
+}
+
 async function loadData(){
  if(flexRestaurants.length)return;
  let base=[];
  try{
    const text=await fetch('./patch.js?v=flex-data-20260918',{cache:'no-store'}).then(r=>r.text());
-   const m=text.match(/const flexRestaurants\s*=\s*\[(.*)\];\s*\n?const duplicateKeys/s);
-   if(m) base=Function('return ['+m[1]+'];')();
+   base=extractFlexArray(text);
  }catch(err){console.error('flex data load failed',err)}
- // flex-kagoshima-additions.js 已在 index.html 載入；把它實際合併進彈性頁資料。
  const extras=Array.isArray(window.__flexExtraRestaurants)?window.__flexExtraRestaurants:[];
- flexRestaurants=[...base,...extras];
+ const restore=Array.isArray(window.__flexFukuokaRestore)?window.__flexFukuokaRestore:[];
+ flexRestaurants=[...base,...extras,...restore];
  const seen=new Set();
  flexRestaurants=flexRestaurants.filter(r=>{
-   if(!r||!regionOf(r)||duplicate((r.names||[]).join(' '),ITIN_RESTAURANTS))return false;
-   const key=norm((r.names||[]).join('|')+'|'+(r.address||''));
+   if(!r||!regionOf(r)||duplicate((r.names||[r.name||'']).join(' '),ITIN_RESTAURANTS))return false;
+   const key=norm((r.names||[r.name||'']).join('|')+'|'+(r.address||''));
    if(seen.has(key))return false;
    seen.add(key);return true;
  });
@@ -55,7 +86,8 @@ function restaurantCard(r){
  const name=escapeHtml((r.names&&r.names[0])||r.name||'餐廳');
  const jp=escapeHtml(r.jp||'');
  const img=r.img||'';
- return `<article class="restaurant flex-rich"><img class="restaurant-img" src="${img}" alt="${jp||name} 餐點／飲品照片" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>${name}</h3><div class="jp">${jp}</div></div><span class="category">${escapeHtml(r.cat||'餐廳')}</span></div><p class="desc">${escapeHtml(r.desc||'')}</p><div class="detail-row"><b>🍴 推薦／招牌</b><br>${escapeHtml(r.menu||'')}</div><div class="detail-row"><b>📍 地址</b><br>${escapeHtml(r.address||'')}</div><div class="detail-row"><b>🕐 營業時間</b><br>${escapeHtml(r.hours||'')}</div><div class="detail-row"><b>☎️ 電話</b><br>${escapeHtml(r.phone||'')}</div>${r.note?`<div class="source-note">${escapeHtml(r.note)}</div>`:''}<div class="restaurant-actions"><a class="map-btn" href="${maps(name,r.address||'')}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div></div></article>`;
+ const image=img?`<img class="restaurant-img" src="${escapeHtml(img)}" alt="${jp||name} 餐點／飲品照片" loading="lazy">`:'';
+ return `<article class="restaurant flex-rich">${image}<div class="restaurant-body"><div class="restaurant-title"><div><h3>${name}</h3><div class="jp">${jp}</div></div><span class="category">${escapeHtml(r.cat||'餐廳')}</span></div><p class="desc">${escapeHtml(r.desc||'')}</p><div class="detail-row"><b>🍴 推薦／招牌</b><br>${escapeHtml(r.menu||'')}</div><div class="detail-row"><b>📍 地址</b><br>${escapeHtml(r.address||'')}</div><div class="detail-row"><b>🕐 營業時間</b><br>${escapeHtml(r.hours||'')}</div><div class="detail-row"><b>☎️ 電話</b><br>${escapeHtml(r.phone||'')}</div>${r.note?`<div class="source-note">${escapeHtml(r.note)}</div>`:''}<div class="restaurant-actions"><a class="map-btn" href="${maps(name,r.address||'')}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div></div></article>`;
 }
 function shoppingCard(r){
  return `<article class="flex-info-card"><div class="flex-info-icon">🛍️</div><div><h3>${escapeHtml(r.name)}</h3><div class="jp">${escapeHtml(r.jp)}</div><p>${escapeHtml(r.desc)}</p><div class="detail-row"><b>📍 地址</b><br>${escapeHtml(r.address)}</div><div class="detail-row"><b>🕐 營業時間</b><br>${escapeHtml(r.hours)}</div><div class="detail-row"><b>☎️ 電話</b><br>${escapeHtml(r.phone)}</div><a class="map-btn" href="${maps(r.name,r.address)}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div></article>`;
