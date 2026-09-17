@@ -1,44 +1,12 @@
-/* 2026-09-17 UI patch: 彈性 categories, verified restaurant data, reliable Day 1 dinner cards */
+/* Stable patch: Day 1 dinner is injected independently of app.js render/state */
 (function(){
-  const originalRender=window.render;
-  state.foodCat=state.foodCat||'全部';
-  const day1Restaurants=[
-    {region:'福岡酒店附近',cat:'咸食',name:'博多もつ鍋 前田屋',jp:'博多もつ鍋前田屋 博多店',desc:'牛雜鍋｜博多代表性鍋物；官方提供味噌、醬油、辛味等口味。',address:'福岡市博多区博多駅前3-26-5 Mビル1F',hours:'11:00–14:30（LO 14:00）；17:00–24:00（食事LO 23:00／飲物LO 23:30）',phone:'092-482-8558',img:'https://cdn-ak.f.st-hatena.com/images/fotolife/v/v2133v/20191017/20191017212647.jpg'},
-    {region:'福岡酒店附近',cat:'咸食',name:'水たき 長野',jp:'博多名代 水たき長野',desc:'清爽系水炊き｜老字號博多水炊き，適合想吃較清爽鍋物的選擇。',address:'福岡市博多区対馬小路1-6',hours:'12:00–22:00；週日休',phone:'092-281-2200',img:'https://images.miil.me/j/493d697e-1f76-11eb-aa8d-06f1f1f9355e.jpg'}
-  ];
-  function catOf(r){const c=(r.cat||'').toLowerCase();if(/酒|sake|craft/.test(c))return '酒類';if(/咖啡|甜品|可麗|水果派|咖啡豆/.test(c))return '咖啡甜品';return '咸食';}
-  function safe(s){return String(s||'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));}
-  function mapsUrl(name,address){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(name+' '+address);}
-  function card(r){return `<article class="restaurant"><img class="restaurant-img" src="${r.img}" alt="${safe(r.name)} 食物照片" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>${safe(r.name)}</h3><div class="jp">${safe(r.jp)}</div></div><span class="category">${safe(r.cat)}</span></div><p class="desc">${safe(r.desc)}</p><div class="address">📍 ${safe(r.address)}</div>${r.hours?`<div class="hours">🕐 ${safe(r.hours)}</div>`:''}${r.phone?`<div class="hours">☎️ ${safe(r.phone)}</div>`:''}<div class="restaurant-actions"><a class="map-btn" href="${mapsUrl(r.name,r.address)}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a><a class="web-btn" href="https://www.google.com/search?q=${encodeURIComponent(r.name+' '+r.address)}" target="_blank" rel="noopener noreferrer">搜尋店家</a></div></div></article>`;}
-  function tabsRename(){document.querySelectorAll('.tab').forEach(b=>{const s=b.querySelector('span');if(s&&s.textContent.trim()==='自由')s.textContent='彈性';});}
-  function freeView(){
-    const q=(state.query||'').trim().toLowerCase(),region=state.region||'全部';
-    const shops=shopping.filter(r=>(region==='全部'||r.region===region)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q)));
-    const all=restaurants.filter(r=>(region==='全部'||r.region===region)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q));
-    const rr=state.foodCat==='全部'?all:all.filter(r=>catOf(r)===state.foodCat),cats=['全部','咸食','咖啡甜品','酒類'];
-    return `<div class="notice"><b>🎟️ 彈性</b><br>不是固定行程，是「臨時想去／想食」的候選庫。先選地區，再按餐廳類型快速篩選。</div><input class="faq-search" value="${safe(state.query||'')}" oninput="state.query=this.value;render()" placeholder="搜尋餐廳、咖啡、甜品、酒類…"><div class="filter-row">${regions.map(r=>`<button class="filter ${region===r?'active':''}" onclick="state.region='${safe(r)}';render()">${safe(r)}</button>`).join('')}</div><div class="section-title"><h2>🛍️ 購物</h2><span class="small">${shops.length}個</span></div><div class="cards">${shops.length?shops.map(card).join(''):`<div class="empty">此地區暫無購物選項</div>`}</div><div class="section-title"><h2>🍴 餐廳</h2><span class="small">${rr.length}個</span></div><div class="sub-filter-row">${cats.map(c=>`<button class="sub-filter ${state.foodCat===c?'active':''}" onclick="state.foodCat='${c}';render()">${c}</button>`).join('')}</div><div class="cards">${rr.length?rr.map(card).join(''):`<div class="empty">找不到符合條件的餐廳</div>`}</div>`;
-  }
-  function addDay1Dinner(){
-    const targets=[...document.querySelectorAll('.event')].filter(e=>e.textContent.includes('天神晚餐選擇'));
-    if(!targets.length)return;
-    targets.forEach(target=>{
-      const old=target.querySelector('.day1-dinner');
-      if(old)old.remove();
-      const holder=document.createElement('div');
-      holder.className='day1-dinner';
-      holder.innerHTML=`<div class="day1-label">🍲 晚餐餐廳資訊｜19:30</div>${day1Restaurants.map(card).join('')}`;
-      (target.querySelector('.event-card')||target).appendChild(holder);
-    });
-  }
-  function renderPatched(){
-    originalRender();
-    tabsRename();
-    requestAnimationFrame(()=>{addDay1Dinner();tabsRename();});
-    setTimeout(()=>{addDay1Dinner();tabsRename();},150);
-  }
-  window.render=renderPatched;
-  const style=document.createElement('style');
-  style.textContent='.sub-filter-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}.sub-filter-row::-webkit-scrollbar{display:none}.sub-filter{white-space:nowrap;border:1px solid #dfe4e2;background:white;border-radius:999px;padding:8px 15px;font-size:13px;color:#667177;cursor:pointer}.sub-filter.active{background:#087f73;color:#fff;border-color:#087f73}.day1-dinner{margin-top:12px}.day1-label{font-weight:800;color:#a55516;background:#fff4dc;border-radius:10px;padding:9px 10px;margin-bottom:10px}.day1-dinner .restaurant{margin-bottom:12px}.day1-dinner .restaurant-img{height:150px}.hours{font-size:12px;line-height:1.55;color:#68747a;background:#f7f8f6;border-radius:10px;padding:7px 8px;margin-top:6px}.restaurant-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.map-btn,.web-btn{display:inline-flex;align-items:center;justify-content:center}.day1-dinner .map-btn{background:#087f73;color:#fff}';
-  document.head.appendChild(style);
-  setTimeout(()=>{tabsRename();addDay1Dinner();},0);
+'use strict';
+const dinner=`<div class="day1-dinner-fixed"><div class="day1-label">🍲 19:30｜天神晚餐選擇</div>
+<article class="restaurant day1-card"><img class="restaurant-img" src="https://cdn-ak.f.st-hatena.com/images/fotolife/v/v2133v/20191017/20191017212647.jpg" alt="博多もつ鍋 前田屋 博多店 牛雜鍋" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>博多もつ鍋 前田屋 博多店</h3><div class="jp">博多もつ鍋 前田屋 博多店</div></div><span class="category">咸食／牛雜鍋</span></div><p class="desc">博多代表性牛雜鍋，主打國產和牛小腸，可選味噌、醬油或辛味鍋。</p><div class="address">📍 福岡市博多区博多駅前3-26-5 Mビル1F</div><div class="hours">🕐 11:00–14:30（LO 14:00）／17:00–24:00（食事LO 23:00・飲物LO 23:30）</div><div class="hours">☎️ 092-482-8558</div><div class="restaurant-actions"><a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('博多もつ鍋 前田屋 博多店 福岡市博多区博多駅前3-26-5 Mビル1F')}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div></div></article>
+<article class="restaurant day1-card"><img class="restaurant-img" src="https://images.miil.me/j/493d697e-1f76-11eb-aa8d-06f1f1f9355e.jpg" alt="水たき 長野 水炊き" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>水たき 長野</h3><div class="jp">博多名代 水たき長野</div></div><span class="category">咸食／水炊き</span></div><p class="desc">博多老字號水炊き，雞湯、雞肉及蔬菜組合，屬較清爽的鍋物選擇。</p><div class="address">📍 福岡市博多区対馬小路1-6</div><div class="hours">🕐 12:00–22:00；週日休</div><div class="hours">☎️ 092-281-2200</div><div class="restaurant-actions"><a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('水たき 長野 福岡市博多区対馬小路1-6')}" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div></div></article></div>`;
+const style=document.createElement('style');style.textContent='.day1-dinner-fixed{margin-top:12px}.day1-label{font-weight:800;color:#a55516;background:#fff4dc;border-radius:10px;padding:10px 12px;margin-bottom:10px}.day1-card{margin-bottom:12px}.day1-card .restaurant-img{height:170px;object-fit:cover}.day1-card .restaurant-body{padding:12px}.day1-card .hours{font-size:12px;line-height:1.5;color:#68747a;background:#f7f8f6;border-radius:10px;padding:7px 8px;margin-top:6px}.day1-card .restaurant-actions{margin-top:10px}.day1-card .map-btn{display:inline-flex;background:#087f73;color:#fff;padding:9px 12px;border-radius:10px;text-decoration:none}.day1-dinner-fixed{box-sizing:border-box}.day1-dinner-fixed *{box-sizing:border-box}';document.head.appendChild(style);
+function rename(){document.querySelectorAll('.tab span').forEach(s=>{if(s.textContent.trim()==='自由')s.textContent='彈性'})}
+function inject(){rename();if(document.querySelector('.day1-dinner-fixed'))return;const nodes=[...document.querySelectorAll('body *')];const t=nodes.find(e=>e.children.length===0&&e.textContent.trim()==='天神晚餐選擇');if(!t)return;const event=t.closest('.event')||t.closest('.event-card')||t.parentElement?.parentElement;if(event)event.insertAdjacentHTML('beforeend',dinner)}
+function run(){try{inject()}catch(e){console.error('Day1 patch',e)}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true});setInterval(run,1000);
 })();
