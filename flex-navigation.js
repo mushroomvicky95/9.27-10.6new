@@ -2,71 +2,24 @@
 (function(){
 'use strict';
 const REGIONS=['福岡酒店附近','福岡天神／大名','福岡LaLaport附近','福岡市區／博多','霧島','櫻島','知覽／指宿','鹿兒島市區','福岡延伸'];
-let cache={};
-let detailRegion=null;
-let detailCat=null;
+let cache={};let detailRegion=null;let detailCat=null;
 const itineraryNames=['博多もつ鍋 前田屋','前田屋','水たき 長野','NOOICE tenjin','いくら博多店','manu coffee 大名店','やりうどん福岡店','みやま本舗','焼肉なべしま','櫻島市場食堂','お食事処海月','鹿兒島屋台村','かごっまふるさと屋台村','めっけもん','新港食堂','大衆酒場かどや','かどや','とりくら','豚とろ','danken COFFEE','可否三昧','Voila Coffee','くじらcafé','うなぎの末よし','Café Cochi','天文館むじゃき本店','ざぼんラーメン','いちにいさん','Gyudo!'];
 const itinerarySpots=['LaLaport 福岡','GUNDAM SIDE-F','霧島神話之里公園','霧島神宮','仙巖園','櫻島遊客中心','湯之平展望所','有村熔岩展望所','知覽武家屋敷庭園群','砂むし會館 砂樂','平川動物公園','天文館むじゃき本店','太宰府天滿宮','柳川遊船','糸島海邊'];
 function norm(s){return String(s||'').replace(/\s+/g,'').toLowerCase()}
 function duplicate(text,list){const n=norm(text);return list.some(x=>n.includes(norm(x))||norm(x).includes(n))}
-function isFlexButton(el){return el && el.matches && el.matches('.tab') && /^(自由|彈性)$/.test((el.querySelector('span')||el).textContent.trim())}
+function isFlexButton(el){return el&&el.matches&&el.matches('.tab')&&/^(自由|彈性)$/.test((el.querySelector('span')||el).textContent.trim())}
 function cleanHtml(html){const box=document.createElement('div');box.innerHTML=html;box.querySelectorAll('.restaurant').forEach(c=>{if(duplicate(c.textContent,itineraryNames))c.remove()});box.querySelectorAll('.spot-detail').forEach(c=>{if(duplicate(c.textContent,itinerarySpots))c.remove()});box.querySelectorAll('.empty').forEach(c=>c.remove());return box.innerHTML}
-function capture(){cache={};
-  const old=window.state.region;
-  window.state.region='全部';
-  window.render();
-  REGIONS.forEach(r=>{
-    window.state.region=r;
-    window.render();
-    cache[r]=cleanHtml(document.querySelector('.content')?.innerHTML||'');
-  });
-  window.state.region=old||'全部';
-}
-function cardCategory(card,sectionTitle){
-  const txt=(card.querySelector('.category')?.textContent||'')+' '+card.textContent;
-  const low=txt.toLowerCase();
-  if(sectionTitle.includes('購物')||card.classList.contains('shopping')||card.classList.contains('shop')) return 'shopping';
-  if(card.classList.contains('spot-detail')) return 'spot';
-  if(/酒|日本酒|沙瓦|燒酎|bar|pub|居酒屋/i.test(low)) return 'bar';
-  if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert/i.test(low)) return 'sweet';
-  return 'savory';
-}
-function extract(region,cat){
-  const box=document.createElement('div');box.innerHTML=cache[region]||'';
-  const out=[];
-  box.querySelectorAll('.section-title').forEach(title=>{
-    const section=title.textContent;
-    let cards=title.nextElementSibling;
-    while(cards && !cards.classList.contains('section-title')){
-      if(cards.classList.contains('cards')){
-        cards.querySelectorAll('.restaurant,.spot-detail').forEach(card=>{
-          const type=cardCategory(card,section);
-          const wanted=cat==='food'?type==='savory':cat==='sweet'?type==='sweet':cat==='bar'?type==='bar':type==='shopping'||type==='spot';
-          if(wanted)out.push(card.outerHTML);
-        });
-      }
-      cards=cards.nextElementSibling;
-    }
-  });
-  return out.join('');
-}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+async function capture(){cache={};const old=window.state.region;window.state.region='全部';window.render();await wait(120);for(const r of REGIONS){window.state.region=r;window.render();await wait(120);cache[r]=cleanHtml(document.querySelector('.content')?.innerHTML||'')}window.state.region=old||'全部'}
+function cardCategory(card,sectionTitle){const txt=(card.querySelector('.category')?.textContent||'')+' '+card.textContent;const low=txt.toLowerCase();if(sectionTitle.includes('購物')||card.classList.contains('shopping')||card.classList.contains('shop'))return'shopping';if(card.classList.contains('spot-detail'))return'spot';if(/酒|日本酒|沙瓦|燒酎|bar|pub|居酒屋/i.test(low))return'bar';if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert/i.test(low))return'sweet';return'savory'}
+function extract(region,cat){const box=document.createElement('div');box.innerHTML=cache[region]||'';const out=[];box.querySelectorAll('.section-title').forEach(title=>{const section=title.textContent;let cards=title.nextElementSibling;while(cards&&!cards.classList.contains('section-title')){if(cards.classList.contains('cards'))cards.querySelectorAll('.restaurant,.spot-detail').forEach(card=>{const type=cardCategory(card,section);const wanted=cat==='food'?type==='savory':cat==='sweet'?type==='sweet':cat==='bar'?type==='bar':type==='shopping'||type==='spot';if(wanted)out.push(card.outerHTML)});cards=cards.nextElementSibling}});return out.join('')}
 function regionHome(){return `<div class="flex-nav-shell"><div class="flex-nav-intro"><div class="flex-kicker">🎟️ 彈性選擇</div><h2>先選地區</h2><p>依照這次行程會到的地區整理；進入地區後，再選「咸食、咖啡甜食、酒類、購物景點」。</p></div><div class="flex-region-grid">${REGIONS.map(r=>`<button class="flex-region-card" onclick="window.flexOpenRegion(${JSON.stringify(r)})"><span class="flex-region-icon">${r.includes('福岡')?'🇯🇵':r==='霧島'?'♨️':r==='櫻島'?'🌋':r==='知覽／指宿'?'🌿':'🌸'}</span><span><b>${r}</b><small>查看餐廳・咖啡・酒類・購物景點</small></span><strong>›</strong></button>`).join('')}</div></div>`}
 function categoryHome(){const cats=[['food','🍱','咸食類','拉麵、鍋物、壽司、燒肉、定食等'],['sweet','☕','咖啡甜食類','咖啡、甜品、水果撻、可麗餅等'],['bar','🍶','酒類','日本酒、燒酎、居酒屋、酒吧等'],['place','🛍️','購物景點類','購物店、伴手禮與行程以外的景點']];return `<div class="flex-nav-shell"><button class="flex-back" onclick="window.flexBack()">‹ 所有地區</button><div class="flex-detail-head"><div class="flex-kicker">📍 ${detailRegion}</div><h2>你想找什麼？</h2><p>選一個分類，再查看完整店家／景點資料。</p></div><div class="flex-category-grid">${cats.map(c=>`<button class="flex-category-card" onclick="window.flexOpenCategory('${c[0]}')"><span>${c[1]}</span><div><b>${c[2]}</b><small>${c[3]}</small></div><strong>›</strong></button>`).join('')}</div></div>`}
 function categoryDetail(){const titles={food:'🍱 咸食類',sweet:'☕ 咖啡甜食類',bar:'🍶 酒類',place:'🛍️ 購物景點類'};const html=extract(detailRegion,detailCat);return `<div class="flex-nav-shell"><button class="flex-back" onclick="window.flexBackToCats()">‹ ${detailRegion}</button><div class="flex-detail-head"><div class="flex-kicker">📍 ${detailRegion}</div><h2>${titles[detailCat]}</h2><p>已排除正式行程內重複出現的餐廳／景點。</p></div><div class="flex-results">${html||'<div class="empty">這個地區目前沒有符合此分類的選項。</div>'}</div></div>`}
 function renderCustom(){const content=document.querySelector('.content');if(!content)return;content.innerHTML=detailRegion?(detailCat?categoryDetail():categoryHome()):regionHome();document.querySelectorAll('.tab span').forEach(s=>{if(s.textContent.trim()==='自由')s.textContent='彈性'});window.scrollTo(0,0)}
-window.flexOpenRegion=function(r){detailRegion=r;detailCat=null;renderCustom()};
-window.flexOpenCategory=function(c){detailCat=c;renderCustom()};
-window.flexBack=function(){detailRegion=null;detailCat=null;renderCustom()};
-window.flexBackToCats=function(){detailCat=null;renderCustom()};
-function enterFlex(){
-  detailRegion=null;detailCat=null;
-  window.state.tab='free';
-  capture();
-  renderCustom();
-}
+window.flexOpenRegion=function(r){detailRegion=r;detailCat=null;renderCustom()};window.flexOpenCategory=function(c){detailCat=c;renderCustom()};window.flexBack=function(){detailRegion=null;detailCat=null;renderCustom()};window.flexBackToCats=function(){detailCat=null;renderCustom()};
+async function enterFlex(){detailRegion=null;detailCat=null;window.state.tab='free';await capture();renderCustom()}
 document.addEventListener('click',function(e){const b=e.target.closest('.tab');if(isFlexButton(b)){e.preventDefault();e.stopImmediatePropagation();enterFlex()}},true);
-const css=`
-.flex-nav-shell{padding:8px 0 120px}.flex-nav-intro,.flex-detail-head{background:#eefaf7;border:1px solid #a9e1d6;border-radius:24px;padding:24px;margin-bottom:18px}.flex-kicker{font-weight:800;color:#087f73;font-size:15px;margin-bottom:6px}.flex-nav-intro h2,.flex-detail-head h2{margin:0 0 8px;font-size:28px;color:#24323b}.flex-nav-intro p,.flex-detail-head p{margin:0;color:#6c7b83;line-height:1.7}.flex-region-grid,.flex-category-grid{display:grid;gap:14px}.flex-region-card,.flex-category-card{width:100%;border:1px solid #e1e6e8;background:#fff;border-radius:22px;padding:20px;display:flex;align-items:center;text-align:left;gap:16px;box-shadow:0 5px 18px rgba(20,50,50,.06);cursor:pointer}.flex-region-card:hover,.flex-category-card:hover{transform:translateY(-1px)}.flex-region-icon,.flex-category-card>span{font-size:32px;min-width:44px;text-align:center}.flex-region-card b,.flex-category-card b{display:block;font-size:20px;color:#26343d}.flex-region-card small,.flex-category-card small{display:block;color:#7b878d;margin-top:5px;line-height:1.45}.flex-region-card strong,.flex-category-card strong{margin-left:auto;font-size:32px;color:#87939a}.flex-back{border:0;background:transparent;color:#087f73;font-size:17px;font-weight:800;padding:4px 0 14px;cursor:pointer}.flex-results{display:grid;gap:18px}.flex-results .cards{display:contents}.flex-results .restaurant,.flex-results .spot-detail{margin:0}.flex-results .section-title,.flex-results .empty{grid-column:1/-1}.flex-results .spot-detail{background:#fff}.flex-category-grid{grid-template-columns:1fr}.flex-region-grid{grid-template-columns:1fr}.flex-nav-shell .restaurant-img{width:100%;height:300px;object-fit:cover}@media(min-width:760px){.flex-region-grid{grid-template-columns:1fr 1fr}.flex-category-grid{grid-template-columns:1fr 1fr}.flex-nav-shell .restaurant-img{height:360px}}
-`;
+const css=`.flex-nav-shell{padding:8px 0 120px}.flex-nav-intro,.flex-detail-head{background:#eefaf7;border:1px solid #a9e1d6;border-radius:24px;padding:24px;margin-bottom:18px}.flex-kicker{font-weight:800;color:#087f73;font-size:15px;margin-bottom:6px}.flex-nav-intro h2,.flex-detail-head h2{margin:0 0 8px;font-size:28px;color:#24323b}.flex-nav-intro p,.flex-detail-head p{margin:0;color:#6c7b83;line-height:1.7}.flex-region-grid,.flex-category-grid{display:grid;gap:14px}.flex-region-card,.flex-category-card{width:100%;border:1px solid #e1e6e8;background:#fff;border-radius:22px;padding:20px;display:flex;align-items:center;text-align:left;gap:16px;box-shadow:0 5px 18px rgba(20,50,50,.06);cursor:pointer}.flex-region-card:hover,.flex-category-card:hover{transform:translateY(-1px)}.flex-region-icon,.flex-category-card>span{font-size:32px;min-width:44px;text-align:center}.flex-region-card b,.flex-category-card b{display:block;font-size:20px;color:#26343d}.flex-region-card small,.flex-category-card small{display:block;color:#7b878d;margin-top:5px;line-height:1.45}.flex-region-card strong,.flex-category-card strong{margin-left:auto;font-size:32px;color:#87939a}.flex-back{border:0;background:transparent;color:#087f73;font-size:17px;font-weight:800;padding:4px 0 14px;cursor:pointer}.flex-results{display:grid;gap:18px}.flex-results .cards{display:contents}.flex-results .restaurant,.flex-results .spot-detail{margin:0}.flex-results .section-title,.flex-results .empty{grid-column:1/-1}.flex-results .spot-detail{background:#fff}.flex-category-grid,.flex-region-grid{grid-template-columns:1fr}.flex-nav-shell .restaurant-img{width:100%;height:300px;object-fit:cover}@media(min-width:760px){.flex-region-grid{grid-template-columns:1fr 1fr}.flex-category-grid{grid-template-columns:1fr 1fr}.flex-nav-shell .restaurant-img{height:360px}}`;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
 })();
