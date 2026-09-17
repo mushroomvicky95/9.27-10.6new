@@ -1,6 +1,5 @@
 /* 彈性頁：四大地區 → 四大分類 → 詳細資料
- * 修正版：不再依賴 window.state / window.render，避免點擊地區後資料為空。
- * 直接從同源 patch.js 讀取既有 flexRestaurants 資料，並自行建立頁面。
+ * 修正版：直接讀取 patch.js + 彈性新增店家資料，確保所有新增資料實際出現在彈性頁。
  */
 (function(){
 'use strict';
@@ -25,8 +24,8 @@ function regionOf(r){
 }
 function catOf(r){
  const t=(r.cat||'')+' '+(r.name||'')+' '+(r.jp||'')+' '+(r.menu||'');
- if(/酒|日本酒|燒酎|焼酎|沙瓦|bar|pub|居酒屋/i.test(t))return 'bar';
- if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert|パフェ|タルト/i.test(t))return 'sweet';
+ if(/酒|日本酒|燒酎|焼酎|沙瓦|bar|pub|居酒屋|beer|啤酒|精釀/i.test(t))return 'bar';
+ if(/咖啡|甜|草莓|水果|可麗餅|派|café|coffee|dessert|パフェ|タルト|gelato|冰淇淋|ソフトクリーム/i.test(t))return 'sweet';
  return 'savory';
 }
 function maps(n,a){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n+' '+a)}
@@ -34,15 +33,22 @@ function escapeHtml(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;',
 
 async function loadData(){
  if(flexRestaurants.length)return;
+ let base=[];
  try{
    const text=await fetch('./patch.js?v=flex-data-20260918',{cache:'no-store'}).then(r=>r.text());
    const m=text.match(/const flexRestaurants\s*=\s*\[(.*)\];\s*\n?const duplicateKeys/s);
-   if(m){
-     flexRestaurants=Function('return ['+m[1]+'];')();
-   }
+   if(m) base=Function('return ['+m[1]+'];')();
  }catch(err){console.error('flex data load failed',err)}
- if(!Array.isArray(flexRestaurants))flexRestaurants=[];
- flexRestaurants=flexRestaurants.filter(r=>r&&regionOf(r)&&!duplicate((r.names||[]).join(' '),ITIN_RESTAURANTS));
+ // flex-kagoshima-additions.js 已在 index.html 載入；把它實際合併進彈性頁資料。
+ const extras=Array.isArray(window.__flexExtraRestaurants)?window.__flexExtraRestaurants:[];
+ flexRestaurants=[...base,...extras];
+ const seen=new Set();
+ flexRestaurants=flexRestaurants.filter(r=>{
+   if(!r||!regionOf(r)||duplicate((r.names||[]).join(' '),ITIN_RESTAURANTS))return false;
+   const key=norm((r.names||[]).join('|')+'|'+(r.address||''));
+   if(seen.has(key))return false;
+   seen.add(key);return true;
+ });
 }
 
 function restaurantCard(r){
@@ -58,7 +64,7 @@ function regionHome(){
  return `<div class="flex-nav-shell"><div class="flex-nav-intro"><div class="flex-kicker">🎟️ 彈性選擇</div><h2>先選地區</h2><p>依照這次旅程的四個主要地區整理；進入地區後，再選「咸食、咖啡甜食、酒類、購物景點」。</p></div><div class="flex-region-grid">${REGIONS.map(r=>`<button type="button" class="flex-region-card" data-region="${r}"><span class="flex-region-icon">${r==='福岡'?'🇯🇵':r==='霧島'?'♨️':r==='櫻島'?'🌋':'🌸'}</span><span><b>${r}</b><small>查看餐廳・咖啡・酒類・購物景點</small></span><strong>›</strong></button>`).join('')}</div></div>`;
 }
 function categoryHome(){
- const cats=[['savory','🍱','咸食類','拉麵、鍋物、壽司、燒肉、定食等'],['sweet','☕','咖啡甜食類','咖啡、甜品、水果撻、可麗餅等'],['bar','🍶','酒類','日本酒、燒酎、居酒屋、酒吧等'],['place','🛍️','購物景點類','購物店、伴手禮與行程以外的景點']];
+ const cats=[['savory','🍱','咸食類','拉麵、鍋物、壽司、燒肉、定食等'],['sweet','☕','咖啡甜食類','咖啡、甜品、水果撻、可麗餅等'],['bar','🍶','酒類','日本酒、燒酎、精釀啤酒、酒吧等'],['place','🛍️','購物景點類','購物店、伴手禮與行程以外的景點']];
  return `<div class="flex-nav-shell"><button type="button" class="flex-back" data-back="regions">‹ 所有地區</button><div class="flex-detail-head"><div class="flex-kicker">📍 ${detailRegion}</div><h2>你想找什麼？</h2><p>選一個分類，再查看完整店家／景點資料。</p></div><div class="flex-category-grid">${cats.map(c=>`<button type="button" class="flex-category-card" data-cat="${c[0]}"><span>${c[1]}</span><div><b>${c[2]}</b><small>${c[3]}</small></div><strong>›</strong></button>`).join('')}</div></div>`;
 }
 function categoryDetail(){
@@ -95,7 +101,5 @@ document.addEventListener('click',async function(e){
 
 const css=`.flex-nav-shell{padding:8px 0 120px}.flex-nav-intro,.flex-detail-head{background:#eefaf7;border:1px solid #a9e1d6;border-radius:24px;padding:24px;margin-bottom:18px}.flex-kicker{font-weight:800;color:#087f73;font-size:15px;margin-bottom:6px}.flex-nav-intro h2,.flex-detail-head h2{margin:0 0 8px;font-size:28px;color:#24323b}.flex-nav-intro p,.flex-detail-head p{margin:0;color:#6c7b83;line-height:1.7}.flex-region-grid,.flex-category-grid{display:grid;gap:14px}.flex-region-card,.flex-category-card{width:100%;border:1px solid #e1e6e8;background:#fff;border-radius:22px;padding:20px;display:flex;align-items:center;text-align:left;gap:16px;box-shadow:0 5px 18px rgba(20,50,50,.06);cursor:pointer;font:inherit}.flex-region-card:hover,.flex-category-card:hover{transform:translateY(-1px)}.flex-region-icon,.flex-category-card>span{font-size:32px;min-width:44px;text-align:center}.flex-region-card b,.flex-category-card b{display:block;font-size:20px;color:#26343d}.flex-region-card small,.flex-category-card small{display:block;color:#7b878d;margin-top:5px;line-height:1.45}.flex-region-card strong,.flex-category-card strong{margin-left:auto;font-size:32px;color:#87939a}.flex-back{border:0;background:transparent;color:#087f73;font-size:17px;font-weight:800;padding:4px 0 14px;cursor:pointer}.flex-results{display:grid;gap:18px}.flex-results .restaurant{margin:0}.flex-results .restaurant-img{width:100%;height:300px;object-fit:cover}.flex-info-card{background:#fff;border:1px solid #e1e6e8;border-radius:22px;padding:22px;display:flex;gap:18px;box-shadow:0 5px 18px rgba(20,50,50,.06)}.flex-info-icon{font-size:40px}.flex-info-card h3{margin:0;font-size:23px;color:#26343d}.flex-info-card p{color:#687780;line-height:1.7}.flex-info-card .map-btn{display:inline-block;margin-top:12px}.flex-category-grid,.flex-region-grid{grid-template-columns:1fr}@media(min-width:760px){.flex-region-grid{grid-template-columns:1fr 1fr}.flex-category-grid{grid-template-columns:1fr 1fr}.flex-results .restaurant-img{height:360px}}`;
 const st=document.createElement('style');st.textContent=css;document.head.appendChild(st);
-
-/* 首次載入後確保分頁文字正確，但不主動改變目前頁面。 */
 document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.tab span').forEach(s=>{if(s.textContent.trim()==='自由')s.textContent='彈性'}));
 })();
