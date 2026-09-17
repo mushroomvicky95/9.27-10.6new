@@ -12,4 +12,17 @@ const EXTRA=[
  {region:'鹿兒島市區',names:['Fruits & Gelato Sakurajima','フルーツ＆ジェラートさくらじま'],jp:'フルーツ＆ジェラートさくらじま',cat:'咖啡甜點類',desc:'鹿兒島中央站步行約6分鐘的水果專門店旁甜點店，以新鮮水果製作義式冰淇淋與水果聖代。',menu:'水果聖代、季節水果Gelato、芒果／百香果等水果口味、季節限定蘋果派',address:'〒890-0045 鹿児島県鹿児島市武2-31-23',hours:'09:00–19:00（L.O.18:00）；不定休',phone:'099-259-0665',img:'https://tblg.k-img.com/restaurant/images/Rvw/69564/640x640_rect_69564196.jpg',note:'鹿兒島市官方旅遊資料也介紹其100%新鮮水果聖代與義式冰淇淋。'}
 ];
 window.__flexExtraRestaurants=EXTRA;
+const nativeFetch=window.fetch.bind(window);
+window.fetch=function(input,init){
+ const url=typeof input==='string'?input:(input&&input.url)||'';
+ if(url.includes('patch.js')){
+   return nativeFetch(input,init).then(async res=>{
+     const text=await res.text();
+     const marker=/\];\s*\n?const duplicateKeys/;
+     const injected=text.replace(marker,'];\nif(window.__flexExtraRestaurants) flexRestaurants.push(...window.__flexExtraRestaurants);\nconst duplicateKeys');
+     return new Response(injected,{status:res.status,statusText:res.statusText,headers:res.headers});
+   });
+ }
+ return nativeFetch(input,init);
+};
 })();
