@@ -4,8 +4,8 @@
 (function(){
 'use strict';
 
-const SUSHI_IMG='https://images.openai.com/static-rsc-1/k41iFY5rY-H_MiZkFtCZj9_xLKmYQ3kJSEtidTVb7dcA8C_usAKXl-wCgpJ77uspwxXee7N8bxXMGjpiBcgDU0t33l2P6EhCUEa6vmfHmOxKFicDDlLnysk8DQDX8Z_pFxp0OUkfyyuDWd2kkMJ2wvW4_YnmtPSnpnwpKfND'; 
-const ROBATA_IMG='https://images.openai.com/static-rsc-1/ChmW_Jj5A8zeSpT_QyzcQPcPQ6lq6CQFitTEk0duBhmtNUJhgRyyEr57pFOpsBOnhoWjMCUimLxJRXzh9RVDU2Lq0LT8BrTGPMTjFihnYn6e15VnbfZDgV4RZJaY3od6tvE_Y_av2C6kf_Mm86epnHspy_y8ekEgi_clvd0WwQc';
+const SUSHI_IMG='https://tblg.k-img.com/restaurant/images/Rvw/187264/640x640_rect_e363d9c70282ef572b3e802a9c8afac9.jpg'; 
+const ROBATA_IMG='https://tblg.k-img.com/restaurant/images/Rvw/235133/640x640_rect_4837a4fa52b35cf52a77406a0622e6ea.jpg';
 
 const places=[
  {time:'09:30–12:50',title:'酒店退房 → 鹿兒島機場 → 福岡',desc:'09:30 東横INN鹿児島中央駅西口退房；10:00–10:40 前往鹿兒島機場並辦理國內線登機；12:00–12:50 鹿兒島 → 福岡。這段主行程把出發與過程時間合併在同一張時間卡內。12:50 抵達福岡機場後，6人主行程完結；餘下旅伴接續福岡自由行。',address:'出發：〒890-0045 鹿児島県鹿児島市武1-6-1｜鹿兒島機場：〒899-6404 鹿児島県霧島市溝辺町麓822｜抵達：〒812-0003 福岡県福岡市博多区下臼井778-1 福岡空港',hours:'09:30 退房 → 10:00–10:40 前往機場 → 12:00–12:50 國內線 → 12:50 抵達福岡',noDetail:true},
@@ -25,7 +25,7 @@ const places=[
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function maps(n,a){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n+' '+a)}
 function restaurantCard(p){
- return '<article class="restaurant day8-oct4-restaurant"><div class="photo-badge">📷 店家餐點／飲品照片</div><img class="restaurant-img" src="'+esc(p.img)+'" alt="'+esc(p.title)+' 餐點照片" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>'+esc(p.title)+'</h3><div class="jp">'+(p.title.includes('Sashisu')?'すし酒場 さしす KITTE博多店':'炉ばた 三光橋')+'</div></div><span class="category">咸食／海鮮</span></div><p class="desc">'+esc(p.desc)+'</p><div class="menu-detail"><b>📍 詳細地址</b><br>'+esc(p.address)+'</div><div class="menu-detail"><b>🕐 營業時間</b><br>'+esc(p.hours)+'</div><div class="menu-detail"><b>☎️ 電話</b><br>'+esc(p.phone)+'</div><div class="restaurant-actions"><a class="map-btn" href="'+maps(p.title,p.address)+'" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a><a class="web-btn" href="https://www.google.com/search?q='+encodeURIComponent(p.title+' 福岡 菜單')+'" target="_blank" rel="noopener noreferrer">🔎 搜尋店家／菜單</a></div></div></article>';
+ return '<article class="restaurant day8-oct4-restaurant"><div class="photo-badge">📷 該店料理實拍（網頁搜尋確認）</div><img class="restaurant-img" src="'+esc(p.img)+'" alt="'+esc(p.title)+' 該店料理照片" loading="lazy" onerror="this.style.display='none'"><div class="restaurant-body"><div class="restaurant-title"><div><h3>'+esc(p.title)+'</h3><div class="jp">'+(p.title.includes('Sashisu')?'すし酒場 さしす KITTE博多店':'炉ばた 三光橋')+'</div></div><span class="category">咸食／海鮮</span></div><p class="desc">'+esc(p.desc)+'</p><div class="menu-detail"><b>📍 詳細地址</b><br>'+esc(p.address)+'</div><div class="menu-detail"><b>🕐 營業時間</b><br>'+esc(p.hours)+'</div><div class="menu-detail"><b>☎️ 電話</b><br>'+esc(p.phone)+'</div><div class="restaurant-actions"><a class="map-btn" href="'+maps(p.title,p.address)+'" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a><a class="web-btn" href="https://www.google.com/search?q='+encodeURIComponent(p.title+' 福岡 菜單')+'" target="_blank" rel="noopener noreferrer">🔎 搜尋店家／菜單</a></div></div></article>';
 }
 function placeCard(p){
  return '<div class="day8-place-detail"><div class="day8-place-meta"><b>📍 地址</b><br>'+esc(p.address)+'</div>'+(p.hours?'<div class="day8-place-meta"><b>🕐 營業／開放時間</b><br>'+esc(p.hours)+'</div>':'')+(p.phone?'<div class="day8-place-meta"><b>☎️ 電話</b><br>'+esc(p.phone)+'</div>':'')+(p.sub?'<div class="day8-place-meta"><b>ℹ️ 備註</b><br>'+esc(p.sub)+'</div>':'')+'<a class="map-btn" href="'+maps(p.title,p.address)+'" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div>';
