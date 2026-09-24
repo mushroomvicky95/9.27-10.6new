@@ -27,9 +27,10 @@ function run(){
  // 住宿資訊卡只跟「入住／住宿」事件；退房、前往機場、移動中的描述不再重複顯示。
  document.querySelectorAll('.event').forEach(e=>{
    const title=(e.querySelector('.event-card h3')?.textContent||'').trim();
+   const time=(e.querySelector('.time')?.textContent||'').trim();
    const t=e.textContent||'';
-   const canShow=/入住|住宿/.test(title);
-   if(!canShow)return;
+   const canShow=/入住|住宿/.test(title)||/^住宿$/.test(time);
+   if(!canShow||/退房/.test(title))return;
    if(t.includes('Richmond Hotel Tenjin Nishidori'))addLodging(e,lodging['Richmond Hotel Tenjin Nishidori']);
    else if(t.includes('霧島観光ホテル'))addLodging(e,lodging['霧島観光ホテル']);
    else if(t.includes('東横INN鹿児島中央駅西口'))addLodging(e,lodging['東横INN鹿児島中央駅西口']);
