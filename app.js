@@ -85,7 +85,11 @@ function groupItineraryEvents(events){
     if(travelBuf.length===1){out.push(travelBuf[0]);travelBuf=[];return;}
     const first=travelBuf[0], last=travelBuf[travelBuf.length-1];
     const title=[first[1],last[1]].filter(Boolean).join(' → ');
-    const desc=travelBuf.map(e=>e[1]+(e[2]?'：'+e[2]:'')).join(' ｜ ');
+    let desc=travelBuf.map(e=>e[1]+(e[2]?'：'+e[2]:'')).join(' ｜ ');
+    // Day 8 首段只保留簡潔的流程摘要，不把每個中間步驟的說明全部塞進卡片。
+    if(/酒店退房/.test(String(first[1]||'')) && /福岡機場/.test(String(last[1]||''))){
+      desc='09:30酒店退房 → 10:00–10:40前往鹿兒島機場 → 12:00鹿兒島飛福岡 → 12:50抵達福岡，6人主行程完結，餘下旅伴接續福岡自由行。';
+    }
     out.push([fmtTimeRange(travelBuf),title,desc]);
     travelBuf=[];
   };
