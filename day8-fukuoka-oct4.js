@@ -20,7 +20,7 @@ const places=[
  {time:'19:20–20:15',title:'前往 Toyoko INN Hakata Nishi-nakasu ＋ Check-in',desc:'取回行李後直接搭計程車前往酒店。辦理入住、放下大行李及伴手禮，再稍作洗漱休息。',address:'〒810-0002 福岡県福岡市中央区西中洲1-16',hours:'Check-in 15:00；Check-out 10:00',phone:'092-739-1045',hotelDetail:true},
  {time:'20:15–21:00',title:'酒店休息／步行前往宵夜',desc:'放下行李後稍作休息，21:00前往春吉；飯店與餐廳距離近，不需要再搭電車。',noDetail:true},
  {time:'21:00–22:30',title:'深夜食堂：炉ばた 三光橋（Robata Sankobashi）',desc:'春吉爐端燒晚餐。以新鮮海鮮、刺身、地雞及當季野菜等炭火料理為主；建議21:00入座，吃完步行返回酒店。',address:'〒810-0003 福岡県福岡市中央区春吉3-22-17 三光ビル1F',hours:'17:00–24:30（LO 23:30）',phone:'092-712-7373',img:ROBATA_IMG,restaurant:true,sub:'距離 Toyoko INN Hakata Nishi-nakasu 約3–4分鐘步行；實際路線以Google Maps當日導航為準。'}
-
+];
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function maps(n,a){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(n+' '+a)}
