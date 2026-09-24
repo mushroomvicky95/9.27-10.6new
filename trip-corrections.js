@@ -20,10 +20,35 @@ function leafEvent(text){
 function cardHTML(x){return `<article class="trip-detail-card trip-food-detail"><img src="${x.photo}" alt="${x.name} 實際料理照片"><div class="trip-detail-body"><div class="trip-detail-top"><div><h3>${x.name}</h3><p class="trip-jp">${x.jp}</p></div><span>${x.tag}</span></div><p>${x.desc}</p><div class="trip-info">📍 ${x.addr}</div><div class="trip-info">🕐 ${x.hours}</div><div class="trip-info">☎️ ${x.tel}</div><a class="trip-map-btn" target="_blank" rel="noopener" href="${x.map}">📍 Google Maps 導航</a></div></article>`}
 function addAfterEvent(event,html,key){if(!event||event.dataset[key])return;event.dataset[key]='1';const wrap=document.createElement('div');wrap.className='trip-correction-wrap';wrap.innerHTML=html;event.insertAdjacentElement('afterend',wrap)}
 function addLodging(event,info){if(!event||event.dataset.lodgingFixed)return;event.dataset.lodgingFixed='1';const wrap=document.createElement('div');wrap.className='trip-correction-wrap';wrap.innerHTML=`<article class="trip-detail-card trip-hotel-detail"><div class="trip-detail-body"><div class="trip-detail-top"><div><h3>🏨 ${info.jp}</h3><p class="trip-jp">${event.textContent.trim()}</p></div><span>住宿</span></div><p>${info.desc}</p><div class="trip-info">📍 ${info.addr}</div><div class="trip-info">🕐 ${info.hours}</div><div class="trip-info">☎️ ${info.tel}</div><a class="trip-map-btn" target="_blank" rel="noopener" href="${info.map}">📍 Google Maps 導航</a></div></article>`;event.insertAdjacentElement('afterend',wrap)}
-function special(text,title,desc,addr,hours,tel,map){const e=leafEvent(text);if(!e||e.dataset.specialFixed)return;e.dataset.specialFixed='1';if(text==='長腳湯（足湯）'||text==='櫻島熔岩渚公園足湯'){const leaves=[...e.querySelectorAll('*')];leaves.forEach(n=>{if(n.childElementCount===0&&n.textContent.trim()==='長腳湯（足湯）')n.textContent='櫻島熔岩渚公園足湯'});e.innerHTML=e.innerHTML.replace('長腳湯（足湯）','櫻島熔岩渚公園足湯')}const wrap=document.createElement('div');wrap.className='trip-correction-wrap';wrap.innerHTML=`<article class="trip-detail-card trip-place-detail"><div class="trip-detail-body"><div class="trip-detail-top"><div><h3>${title}</h3><p class="trip-jp">行程景點資料補充</p></div><span>景點</span></div><p>${desc}</p><div class="trip-info">📍 ${addr}</div><div class="trip-info">🕐 ${hours}</div>${tel?`<div class="trip-info">☎️ ${tel}</div>`:''}<a class="trip-map-btn" target="_blank" rel="noopener" href="${map}">📍 Google Maps 導航</a></div></article>`;e.insertAdjacentElement('afterend',wrap)}
+function special(text,title,desc,addr,hours,tel,map){
+ const e=leafEvent(text);
+ if(!e||e.dataset.specialFixed)return;
+ // 若 itinerary-spots.js 已經在同一事件內建立完整景點卡，就不要再追加第二張。
+ if(e.querySelector('.itinerary-spot-detail'))return;
+ e.dataset.specialFixed='1';
+ if(text==='長腳湯（足湯）'||text==='櫻島熔岩渚公園足湯'){
+   const leaves=[...e.querySelectorAll('*')];
+   leaves.forEach(n=>{if(n.childElementCount===0&&n.textContent.trim()==='長腳湯（足湯）')n.textContent='櫻島熔岩渚公園足湯'});
+   e.innerHTML=e.innerHTML.replace('長腳湯（足湯）','櫻島熔岩渚公園足湯')
+ }
+ const wrap=document.createElement('div');
+ wrap.className='trip-correction-wrap';
+ wrap.innerHTML=`<article class="trip-detail-card trip-place-detail"><div class="trip-detail-body"><div class="trip-detail-top"><div><h3>${title}</h3><p class="trip-jp">行程景點資料補充</p></div><span>景點</span></div><p>${desc}</p><div class="trip-info">📍 ${addr}</div><div class="trip-info">🕐 ${hours}</div>${tel?`<div class="trip-info">☎️ ${tel}</div>`:''}<a class="trip-map-btn" target="_blank" rel="noopener" href="${map}">📍 Google Maps 導航</a></div></article>`;
+ e.insertAdjacentElement('afterend',wrap)
+}
+function cleanDuplicatePlaceCards(){
+ document.querySelectorAll('.event').forEach(e=>{
+   if(!e.querySelector('.itinerary-spot-detail'))return;
+   e.querySelectorAll('.trip-correction-wrap .trip-place-detail').forEach(card=>{
+     const wrap=card.closest('.trip-correction-wrap');
+     if(wrap)wrap.remove(); else card.remove();
+   });
+ });
+}
 function run(){
  const body=document.body;
  if(!body)return;
+ cleanDuplicatePlaceCards();
  // 住宿資訊卡只跟「入住／住宿」事件；退房、前往機場、移動中的描述不再重複顯示。
  document.querySelectorAll('.event').forEach(e=>{
    const title=(e.querySelector('.event-card h3')?.textContent||'').trim();
