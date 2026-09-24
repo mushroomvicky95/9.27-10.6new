@@ -37,12 +37,18 @@ function special(text,title,desc,addr,hours,tel,map){
  e.insertAdjacentElement('afterend',wrap)
 }
 function cleanDuplicatePlaceCards(){
- document.querySelectorAll('.event').forEach(e=>{
-   if(!e.querySelector('.itinerary-spot-detail'))return;
-   e.querySelectorAll('.trip-correction-wrap .trip-place-detail').forEach(card=>{
+ const detailNames=[...document.querySelectorAll('.event .itinerary-spot-detail h4')].map(h=>(h.textContent||'').trim()).filter(Boolean);
+ if(!detailNames.length)return;
+ document.querySelectorAll('.trip-correction-wrap .trip-place-detail').forEach(card=>{
+   const cardText=(card.textContent||'').replace(/\s+/g,'');
+   const isDuplicate=detailNames.some(name=>{
+     const n=name.replace(/\s+/g,'');
+     return cardText.includes(n)||((n.includes('池田湖')||n.includes('開聞岳'))&&cardText.includes('池田湖畔'))||((n.includes('砂むし会館砂楽')||n.includes('砂むし會館砂樂'))&&(cardText.includes('砂樂')||cardText.includes('砂楽')));
+   });
+   if(isDuplicate){
      const wrap=card.closest('.trip-correction-wrap');
      if(wrap)wrap.remove(); else card.remove();
-   });
+   }
  });
 }
 function run(){
