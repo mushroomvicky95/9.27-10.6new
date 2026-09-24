@@ -23,8 +23,10 @@ function addHotels(){
  document.querySelectorAll('.event').forEach(e=>{
    const t=e.textContent||'';
    const title=(e.querySelector('.event-card h3')?.textContent||'').trim();
+   const time=(e.querySelector('.time')?.textContent||'').trim();
    const key=Object.keys(hotels).find(k=>t.includes(k));
-   if(!key||!(/入住|住宿/.test(title))||e.dataset.finalHotelAdded)return;
+   const isStayEvent=/入住|住宿/.test(title)||/^住宿$/.test(time);
+   if(!key||!isStayEvent||/退房/.test(title)||e.dataset.finalHotelAdded)return;
    e.dataset.finalHotelAdded='1';
    const w=document.createElement('div');
    w.className='trip-correction-wrap final-hotel-wrap';
