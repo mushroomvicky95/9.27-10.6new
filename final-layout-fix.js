@@ -19,7 +19,19 @@ function hotelCard(d){return `<article class="trip-detail-card final-hotel-card"
 function cleanWrongDinner(){document.querySelectorAll('.trip-dinner-grid:not(.final-day2-dinner)').forEach(w=>w.remove())}
 function addDay2(){if(document.querySelector('.final-day2-dinner'))return;const e=eventExact('20:30天神晚餐')||eventExact('20:30 天神晚餐')||eventExact('20:30｜天神晚餐')||[...document.querySelectorAll('.event')].find(x=>{const t=(x.textContent||'').trim();return t.endsWith('天神晚餐')&&!t.includes('晚餐選擇')});if(!e)return;const w=document.createElement('div');w.className='trip-correction-wrap trip-dinner-grid final-day2-dinner';w.innerHTML=dinners.map(dinnerCard).join('');e.insertAdjacentElement('afterend',w)}
 function cleanOldHotels(){document.querySelectorAll('.trip-hotel-detail:not(.final-hotel-card)').forEach(x=>{const w=x.closest('.trip-correction-wrap');if(w)w.remove();else x.remove()})}
-function addHotels(){document.querySelectorAll('.event').forEach(e=>{const t=e.textContent||'';const key=Object.keys(hotels).find(k=>t.includes(k));if(!key||e.dataset.finalHotelAdded)return;e.dataset.finalHotelAdded='1';const w=document.createElement('div');w.className='trip-correction-wrap final-hotel-wrap';w.innerHTML=hotelCard(hotels[key]);e.insertAdjacentElement('afterend',w)})}
+function addHotels(){
+ document.querySelectorAll('.event').forEach(e=>{
+   const t=e.textContent||'';
+   const title=(e.querySelector('.event-card h3')?.textContent||'').trim();
+   const key=Object.keys(hotels).find(k=>t.includes(k));
+   if(!key||!(/入住|住宿/.test(title))||e.dataset.finalHotelAdded)return;
+   e.dataset.finalHotelAdded='1';
+   const w=document.createElement('div');
+   w.className='trip-correction-wrap final-hotel-wrap';
+   w.innerHTML=hotelCard(hotels[key]);
+   e.insertAdjacentElement('afterend',w);
+ })
+}
 function run(){if(!document.body)return;cleanWrongDinner();cleanOldHotels();addDay2();addHotels()}
 const css=document.createElement('style');css.textContent=`.final-day2-dinner{grid-column:2;width:100%;margin:12px 0 24px;display:grid;grid-template-columns:1fr 1fr;gap:18px}.final-day2-dinner .final-dinner-card{min-width:0}.final-dinner-card,.final-hotel-card{background:#fff;border:1px solid #e4e8e8;border-radius:22px;overflow:hidden;box-shadow:0 8px 24px rgba(20,50,50,.07)}.final-dinner-card img{display:block;width:100%;height:330px;object-fit:cover}.final-dinner-card .trip-detail-body,.final-hotel-card .trip-detail-body{padding:20px}.final-hotel-wrap{grid-column:2;width:100%;margin:12px 0 24px}.final-hotel-card{border-color:#b9e5dc}.trip-detail-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.trip-detail-top h3{margin:0;font-size:24px;color:#24323b}.trip-detail-top>span{background:#eefaf7;color:#087f73;border-radius:999px;padding:8px 12px;white-space:nowrap;font-weight:700}.trip-jp{margin:5px 0 12px;color:#7a878d;font-size:16px}.final-dinner-card .trip-detail-body>p,.final-hotel-card .trip-detail-body>p{color:#65747c;line-height:1.7;font-size:16px}.trip-info{background:#f6f8f8;border-radius:14px;padding:12px 14px;margin-top:9px;color:#68777e;font-size:15px}.trip-map-btn{display:inline-block;margin-top:12px;padding:11px 16px;border-radius:999px;background:#087f73;color:#fff!important;text-decoration:none;font-weight:800}@media(max-width:759px){.final-day2-dinner,.final-hotel-wrap{grid-column:1}.final-day2-dinner{grid-template-columns:1fr}.final-dinner-card img{height:250px}.trip-detail-top{flex-direction:column}.trip-detail-top>span{align-self:flex-start}}`;
 document.head.appendChild(css);let busy=false;function safeRun(){if(busy)return;busy=true;try{run()}finally{busy=false}}new MutationObserver(()=>setTimeout(safeRun,80)).observe(document.body,{childList:true,subtree:true});setTimeout(safeRun,500);setInterval(safeRun,1800);
