@@ -79,20 +79,41 @@ function fmtTimeRange(items){
 }
 function groupItineraryEvents(events){
   const out=[];
-  let buf=[];
-  const flush=()=>{
-    if(!buf.length)return;
-    if(buf.length===1){out.push(buf[0]);buf=[];return;}
-    const first=buf[0], last=buf[buf.length-1];
+  let travelBuf=[];
+  const flushTravel=()=>{
+    if(!travelBuf.length)return;
+    if(travelBuf.length===1){out.push(travelBuf[0]);travelBuf=[];return;}
+    const first=travelBuf[0], last=travelBuf[travelBuf.length-1];
     const title=[first[1],last[1]].filter(Boolean).join(' → ');
-    const desc=buf.map(e=>e[1]+(e[2]?'：'+e[2]:'')).join(' ｜ ');
-    out.push([fmtTimeRange(buf),title,desc]);
-    buf=[];
+    const desc=travelBuf.map(e=>e[1]+(e[2]?'：'+e[2]:'')).join(' ｜ ');
+    out.push([fmtTimeRange(travelBuf),title,desc]);
+    travelBuf=[];
+  };
+  const mergeTravelWithDestination=(destination)=>{
+    if(!travelBuf.length)return false;
+    const lastTravel=String(travelBuf[travelBuf.length-1][1]||'');
+    if(/酒店退房|退房/.test(lastTravel))return false;
+    const title=String(destination[1]||'');
+    return !!findSpot(title)||/入住|住宿/.test(title);
   };
   for(const e of events){
-    if(isTravelEvent(e))buf.push(e); else {flush();out.push(e);}
+    if(isTravelEvent(e)){
+      travelBuf.push(e);
+      continue;
+    }
+    if(mergeTravelWithDestination(e)){
+      const merged=[...travelBuf,e];
+      const first=merged[0], last=merged[merged.length-1];
+      const title=[first[1],last[1]].filter(Boolean).join(' → ');
+      const desc=merged.map(x=>x[1]+(x[2]?'：'+x[2]:'')).join(' ｜ ');
+      out.push([fmtTimeRange(merged),title,desc]);
+      travelBuf=[];
+    }else{
+      flushTravel();
+      out.push(e);
+    }
   }
-  flush();
+  flushTravel();
   return out;
 }
 function itinerary(){if(state.day){const d=days.find(x=>x.n===state.day);return `<div class="detail-head"><button class="back" onclick="state.day=null;render()">‹</button><div><h2>Day ${d.n}｜${d.title}</h2><div class="date">${d.date} ・ ${d.sub}</div></div></div><div class="timeline">${groupItineraryEvents(d.events).map((e,i)=>{const s=findSpot(e[1]);return `<div class="event"><div class="dot">${i+1}</div><div class="event-card"><div class="time">${e[0]}</div><h3>${e[1]}</h3><p>${e[2]||''}</p>${s?spotInfo(s):''}</div></div>`}).join('')}</div>`}return `<div class="notice">行程景點已補上「營業／開放時間＋地址＋簡介＋Google Maps」。點 Day 卡片查看。</div><div class="day-grid">${days.map(d=>`<article class="day-card" onclick="state.day=${d.n};render()"><div class="day-no"><strong>${d.n}</strong><span>DAY</span></div><div class="day-main"><h3>${d.title}</h3><p>${d.date} ・ ${d.sub}</p></div><div class="arrow">›</div></article>`).join('')}</div>`}
