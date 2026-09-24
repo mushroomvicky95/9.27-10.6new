@@ -58,7 +58,44 @@ function header(){return `<header class="hero"><h1>鹿兒島家族自駕遊</h1>
 function tabs(){return `<nav class="tabs">${[['itinerary','📅','行程'],['free','🎟️','自由'],['check','📋','注意'],['flight','✈️','航班'],['faq','💬','問答']].map(x=>`<button class="tab ${state.tab===x[0]?'active':''}" onclick="setTab('${x[0]}')"><div class="ico">${x[1]}</div><span>${x[2]}</span></button>`).join('')}</nav>`}
 function spotInfo(s){return `<div class="info-card spot-detail"><h3>📍 ${s[1]}</h3><p>${s[2]}</p><div class="spot-meta"><div><b>營業／開放時間</b><br>${s[3]}</div><div><b>地址</b><br>${s[4]}</div></div><a class="map-btn" href="${maps(s[1],s[4])}" target="_blank" rel="noopener">Google Maps 導航</a></div>`}
 function findSpot(title){return spots.find(s=>title.includes(s[1])||s[1].includes(title))}
-function itinerary(){if(state.day){const d=days.find(x=>x.n===state.day);return `<div class="detail-head"><button class="back" onclick="state.day=null;render()">‹</button><div><h2>Day ${d.n}｜${d.title}</h2><div class="date">${d.date} ・ ${d.sub}</div></div></div><div class="timeline">${d.events.map((e,i)=>{const s=findSpot(e[1]);return `<div class="event"><div class="dot">${i+1}</div><div class="event-card"><div class="time">${e[0]}</div><h3>${e[1]}</h3><p>${e[2]||''}</p>${s?spotInfo(s):''}</div></div>`}).join('')}</div>`}return `<div class="notice">行程景點已補上「營業／開放時間＋地址＋簡介＋Google Maps」。點 Day 卡片查看。</div><div class="day-grid">${days.map(d=>`<article class="day-card" onclick="state.day=${d.n};render()"><div class="day-no"><strong>${d.n}</strong><span>DAY</span></div><div class="day-main"><h3>${d.title}</h3><p>${d.date} ・ ${d.sub}</p></div><div class="arrow">›</div></article>`).join('')}</div>`}
+function isTravelEvent(e){
+  const t=String(e[1]||'');
+  if(/餐|午餐|晚餐|早餐|購物|自由活動|自由行|休息|入住|住宿|參拜|展望|商店街|動物公園|公園|仙巖園|神宮|足湯|砂樂|咖啡|甜品|午休/.test(t))return false;
+  return /前往|搭|抵達|辦理登機|租車|還車|返回|回博多站|回鹿兒島|的士|機場|→|酒店退房|出發/.test(t);
+}
+function eventTimeParts(s){
+  const m=String(s||'').match(/(\d{1,2}):(\d{2})(?:\s*[–-]\s*(\d{1,2}):(\d{2}))?/);
+  if(!m)return null;
+  const start=Number(m[1])*60+Number(m[2]);
+  const end=m[3]?Number(m[3])*60+Number(m[4]):start;
+  return {start,end};
+}
+function fmtTimeRange(items){
+  const ps=items.map(e=>eventTimeParts(e[0])).filter(Boolean);
+  if(!ps.length)return items[0]?.[0]||'';
+  const start=Math.min(...ps.map(x=>x.start)), end=Math.max(...ps.map(x=>x.end));
+  const f=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+  return start===end?f(start):f(start)+'–'+f(end);
+}
+function groupItineraryEvents(events){
+  const out=[];
+  let buf=[];
+  const flush=()=>{
+    if(!buf.length)return;
+    if(buf.length===1){out.push(buf[0]);buf=[];return;}
+    const first=buf[0], last=buf[buf.length-1];
+    const title=[first[1],last[1]].filter(Boolean).join(' → ');
+    const desc=buf.map(e=>e[1]+(e[2]?'：'+e[2]:'')).join(' ｜ ');
+    out.push([fmtTimeRange(buf),title,desc]);
+    buf=[];
+  };
+  for(const e of events){
+    if(isTravelEvent(e))buf.push(e); else {flush();out.push(e);}
+  }
+  flush();
+  return out;
+}
+function itinerary(){if(state.day){const d=days.find(x=>x.n===state.day);return `<div class="detail-head"><button class="back" onclick="state.day=null;render()">‹</button><div><h2>Day ${d.n}｜${d.title}</h2><div class="date">${d.date} ・ ${d.sub}</div></div></div><div class="timeline">${groupItineraryEvents(d.events).map((e,i)=>{const s=findSpot(e[1]);return `<div class="event"><div class="dot">${i+1}</div><div class="event-card"><div class="time">${e[0]}</div><h3>${e[1]}</h3><p>${e[2]||''}</p>${s?spotInfo(s):''}</div></div>`}).join('')}</div>`}return `<div class="notice">行程景點已補上「營業／開放時間＋地址＋簡介＋Google Maps」。點 Day 卡片查看。</div><div class="day-grid">${days.map(d=>`<article class="day-card" onclick="state.day=${d.n};render()"><div class="day-no"><strong>${d.n}</strong><span>DAY</span></div><div class="day-main"><h3>${d.title}</h3><p>${d.date} ・ ${d.sub}</p></div><div class="arrow">›</div></article>`).join('')}</div>`}
 function photoCard(r){return `<article class="restaurant"><div class="photo-badge">📷 該店實際餐點／飲品照片</div><img class="restaurant-img" src="${r.img}" alt="${r.name} 店家餐點照片" loading="lazy"><div class="restaurant-body"><div class="restaurant-title"><div><h3>${r.name}</h3><div class="jp">${r.jp}</div></div><span class="category">${r.cat}</span></div><p class="desc">${r.desc}</p><div class="address">📍 ${r.address}</div><div class="hours">🕐 ${r.hours}</div><div class="restaurant-actions"><a class="map-btn" href="${maps(r.name,r.address)}" target="_blank" rel="noopener">Google Maps</a><a class="web-btn" href="https://www.google.com/search?q=${encodeURIComponent(r.name+' 福岡') }" target="_blank" rel="noopener">搜尋店家</a></div></div></article>`}
 function free(){const q=state.query.trim().toLowerCase();const ss=spots.filter(s=>(state.region==='全部'||s[0]===state.region)&&(!q||s.join(' ').toLowerCase().includes(q)));const rr=restaurants.filter(r=>(state.region==='全部'||r.region===state.region)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q)));const bb=shopping.filter(r=>(state.region==='全部'||r.region===state.region)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q)));return `<div class="notice"><b>🎟️ 自由分頁</b><br>不是固定行程，是「臨時想去／想食」的候選庫。現在只分成 <b>購物</b> 和 <b>餐廳</b>，再用地區快速篩選。</div><input class="faq-search" value="${state.query}" oninput="state.query=this.value;render()" placeholder="搜尋醬油、咖啡、牛カツ、甜品…"><div class="filter-row">${regions.map(r=>`<button class="filter ${state.region===r?'active':''}" onclick="state.region='${r}';render()">${r}</button>`).join('')}</div><div class="section-title"><h2>🛍️ 購物</h2><span class="small">${bb.length}個</span></div><div class="cards">${bb.length?bb.map(photoCard).join(''):`<div class="empty">此地區暫無購物選項</div>`}</div><div class="section-title"><h2>🍴 餐廳</h2><span class="small">${rr.length}個</span></div><div class="cards">${rr.length?rr.map(photoCard).join(''):`<div class="empty">找不到符合條件的餐廳</div>`}</div>${ss.length?`<div class="section-title"><h2>📍 附近景點資料</h2><span class="small">${ss.length}個</span></div><div class="cards">${ss.map(s=>spotInfo(s)).join('')}</div>`:''}`}
 function check(){const saved=JSON.parse(localStorage.getItem('kagoshima-check')||'[]');return `<div class="notice">出門前逐項打勾，狀態會儲存在手機瀏覽器。</div><div class="check-head"><b>✅ 出發前必備</b><b>${saved.length}/${checklist.length}</b></div><div class="checklist">${checklist.map((x,i)=>`<div class="check-item"><input id="c${i}" type="checkbox" ${saved.includes(i)?'checked':''} onchange="toggleCheck(${i},this.checked)"><label for="c${i}" class="${saved.includes(i)?'done':''}">${x}</label></div>`).join('')}</div>`}
