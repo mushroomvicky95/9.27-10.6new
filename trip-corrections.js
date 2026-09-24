@@ -24,8 +24,16 @@ function special(text,title,desc,addr,hours,tel,map){const e=leafEvent(text);if(
 function run(){
  const body=document.body;
  if(!body)return;
- // 住宿：Day 1–2 Richmond、Day 3 AUBEGIO、Day 4–7 Toyoko
- document.querySelectorAll('.event').forEach(e=>{const t=e.textContent;if(t.includes('Richmond Hotel Tenjin Nishidori'))addLodging(e,lodging['Richmond Hotel Tenjin Nishidori']);else if(t.includes('霧島観光ホテル'))addLodging(e,lodging['霧島観光ホテル']);else if(t.includes('東横INN鹿児島中央駅西口'))addLodging(e,lodging['東横INN鹿児島中央駅西口'])});
+ // 住宿資訊卡只跟「入住／住宿」事件；退房、前往機場、移動中的描述不再重複顯示。
+ document.querySelectorAll('.event').forEach(e=>{
+   const title=(e.querySelector('.event-card h3')?.textContent||'').trim();
+   const t=e.textContent||'';
+   const canShow=/入住|住宿/.test(title);
+   if(!canShow)return;
+   if(t.includes('Richmond Hotel Tenjin Nishidori'))addLodging(e,lodging['Richmond Hotel Tenjin Nishidori']);
+   else if(t.includes('霧島観光ホテル'))addLodging(e,lodging['霧島観光ホテル']);
+   else if(t.includes('東横INN鹿児島中央駅西口'))addLodging(e,lodging['東横INN鹿児島中央駅西口']);
+ });
  const dinnerEvent=leafEvent('天神晚餐');
  if(dinnerEvent&&!dinnerEvent.dataset.dinnerFixed){dinnerEvent.dataset.dinnerFixed='1';const wrap=document.createElement('div');wrap.className='trip-correction-wrap trip-dinner-grid';wrap.innerHTML=dinners.map(cardHTML).join('');dinnerEvent.insertAdjacentElement('afterend',wrap)}
  special('自駕前往櫻島渡輪碼頭','鹿児島港櫻島渡輪碼頭','從鹿兒島市區自駕前往鹿兒島港，這裡是帶車搭乘櫻島渡輪的主要登船處。官方地址為本港新町4-1；汽車可上船。','〒892-0814 鹿児島県鹿児島市本港新町4-1','依當日渡輪班次；鹿兒島港－櫻島航程約15分鐘','099-223-7271',MAP('鹿児島港フェリーターミナル, 鹿児島市本港新町4-1'));
