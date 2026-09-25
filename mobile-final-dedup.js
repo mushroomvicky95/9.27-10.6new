@@ -1,7 +1,7 @@
 /* Mobile itinerary dedup + consistent restaurant photo sizing (2026-09-26) */
 (function(){
 'use strict';
-const VERSION='20260926-2';
+const VERSION='20260926-3';
 const norm=s=>String(s||'').replace(/[\s　]+/g,'').toLowerCase();
 
 function fixDay1Dinner(){
@@ -73,9 +73,38 @@ function alignMobile(){
     });
   });
 }
+
+function dedupDay6InfoCards(){
+  // Day 6 (South Satsuma: Chiran + Ibusuki): keep only one generated info card
+  // for each identical restaurant/spot title within that day's timeline.
+  const timeline=document.querySelectorAll('.timeline')[5];
+  if(!timeline)return;
+  const seen=new Set();
+  const cards=[...timeline.querySelectorAll('.trip-detail-card,.itinerary-spot-detail,.day1-card,.final-dinner-card')];
+  cards.forEach(card=>{
+    const heading=card.querySelector('h3,h4,.spot-detail-head h4');
+    const title=norm(heading?.textContent||'');
+    if(!title)return;
+    if(seen.has(title)){
+      const wrap=card.closest('.trip-correction-wrap');
+      if(wrap && wrap.querySelectorAll('.trip-detail-card,.itinerary-spot-detail,.day1-card,.final-dinner-card').length===1)wrap.remove();
+      else card.remove();
+    }else seen.add(title);
+  });
+  // If a legacy standalone duplicate detail wrapper remains adjacent to an
+  // event that already contains its own full detail card, remove the wrapper.
+  timeline.querySelectorAll(':scope > .trip-correction-wrap').forEach(w=>{
+    const title=norm(w.querySelector('h3,h4')?.textContent||'');
+    if(!title)return;
+    const duplicateInsideEvent=[...timeline.querySelectorAll(':scope > .event .itinerary-spot-detail h4,:scope > .event .trip-detail-card h3')].some(h=>norm(h.textContent)===title);
+    if(duplicateInsideEvent)w.remove();
+  });
+}
+
 function run(){
   document.documentElement.dataset.travelAppVersion=VERSION;
   fixDay1Dinner();
+  dedupDay6InfoCards();
   dedupGenerated();
   dedupEvents();
   alignMobile();
