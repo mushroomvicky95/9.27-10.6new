@@ -74,48 +74,60 @@ function alignMobile(){
   });
 }
 
+function activeDayNumber(){
+  const h=document.querySelector('.detail-head h2');
+  const m=(h?.textContent||'').match(/Day\\s*(\\d+)/i);
+  return m?Number(m[1]):null;
+}
+
+function activeTimeline(){
+  const t=document.querySelector('.timeline');
+  return t||null;
+}
+
 function dedupDay6InfoCards(){
-  // Do not depend on a fixed timeline index: mobile/flex layouts can insert
-  // extra timeline containers. Locate Day 6 by its rendered section heading,
-  // then deduplicate all info-card types inside that day's timeline.
-  const timelines=[...document.querySelectorAll('.timeline')];
-  const day6=timelines.find(t=>{
-    const section=t.closest('.day-section,.day-panel,.day-content,.detail-section')||t.parentElement?.parentElement;
-    const heading=section?.querySelector('.detail-head h2,.day-title,h2');
-    return /Day\s*6\b|Day\s*6/.test(heading?.textContent||'') ||
-      /南薩摩：知覽\+指宿砂浴|南薩摩：知覽＋指宿砂浴/.test(section?.textContent?.slice(0,300)||'');
-  }) || timelines[5];
+  if(activeDayNumber()!==6)return;
+  const day6=activeTimeline();
   if(!day6)return;
-  const selectors='.trip-detail-card,.itinerary-spot-detail,.day1-card,.final-dinner-card,.itinerary-restaurant-card';
-  const seen=new Set();
-  [...day6.querySelectorAll(selectors)].forEach(card=>{
-    const heading=card.querySelector('h3,h4,.spot-detail-head h4,.restaurant-title h3');
-    const title=norm(heading?.textContent||'');
-    if(!title)return;
-    if(seen.has(title)){
-      const wrap=card.closest('.trip-correction-wrap,.itinerary-restaurant-block');
-      if(wrap && wrap.querySelectorAll(selectors).length===1)wrap.remove();
-      else card.remove();
-    }else seen.add(title);
+  day6.classList.add('day6-dedup-applied');
+
+  // app.js renders a compact .info-card.spot-detail and itinerary-spots.js
+  // adds the richer .itinerary-spot-detail for the same attraction. On Day 6
+  // keep the richer card and remove the older duplicate inside that event.
+  day6.querySelectorAll(':scope > .event').forEach(ev=>{
+    const rich=[...ev.querySelectorAll('.itinerary-spot-detail')];
+    if(rich.length){
+      const seen=new Set();
+      rich.forEach(card=>{
+        const h=card.querySelector('h4');
+        const key=norm(h?.textContent||card.textContent.slice(0,120));
+        if(seen.has(key))card.remove();else seen.add(key);
+      });
+      ev.querySelectorAll('.info-card.spot-detail').forEach(old=>old.remove());
+    }
   });
-  // Remove standalone correction wrappers duplicating a detail card already
-  // embedded in one of Day 6's event cards.
-  day6.querySelectorAll(':scope > .trip-correction-wrap,:scope > .itinerary-restaurant-block').forEach(w=>{
-    const title=norm(w.querySelector('h3,h4,.spot-detail-head h4,.restaurant-title h3')?.textContent||'');
-    if(!title)return;
-    const duplicate=[...day6.querySelectorAll(':scope > .event .trip-detail-card h3,:scope > .event .itinerary-spot-detail h4,:scope > .event .restaurant-title h3')].some(h=>norm(h.textContent)===title);
-    if(duplicate)w.remove();
+
+  // Also collapse duplicate standalone detail wrappers by their visible title.
+  const seenWrap=new Set();
+  day6.querySelectorAll(':scope > .trip-correction-wrap, :scope > .itinerary-restaurant-block').forEach(w=>{
+    const h=w.querySelector('.trip-detail-card h3,.restaurant-title h3,.spot-detail-head h4');
+    const key=norm(h?.textContent||'');
+    if(!key)return;
+    if(seenWrap.has(key))w.remove();else seenWrap.add(key);
   });
 }
 
 function fixDay9PhotoSize(){
-  const timelines=[...document.querySelectorAll('.timeline')];
-  const day9=timelines[8];
+  if(activeDayNumber()!==9)return;
+  const day9=activeTimeline();
   if(!day9)return;
-  day9.querySelectorAll('.itinerary-restaurant-card .restaurant-img,.trip-detail-card>img,.final-dinner-card>img,.restaurant-card .restaurant-img').forEach(img=>{
-    img.style.setProperty('height',innerWidth<=759?'220px':'310px','important');
-    img.style.setProperty('min-height',innerWidth<=759?'220px':'310px','important');
-    img.style.setProperty('max-height',innerWidth<=759?'220px':'310px','important');
+  // Day 1's actual mobile restaurant card uses a 220px photo. Match that
+  // exact height for every Day 9 restaurant card.
+  day9.querySelectorAll('.itinerary-restaurant-card .restaurant-img, .restaurant-card .restaurant-img, .restaurant .restaurant-img, .final-dinner-card img, .trip-detail-card.trip-food-detail img').forEach(img=>{
+    const h=innerWidth<=759?'220px':'330px';
+    img.style.setProperty('height',h,'important');
+    img.style.setProperty('min-height',h,'important');
+    img.style.setProperty('max-height',h,'important');
     img.style.setProperty('width','100%','important');
     img.style.setProperty('object-fit','cover','important');
     img.style.setProperty('object-position','center','important');
@@ -138,12 +150,13 @@ const css=document.createElement('style');
 css.id='restaurant-photo-size-unify-20260926';
 css.textContent=`
 /* Day 9 restaurant-detail photos match Day 1 restaurant cards */
-.trip-detail-card>img,.final-dinner-card>img,.day1-card>.restaurant-img{
- display:block!important;width:100%!important;height:310px!important;min-height:310px!important;max-height:310px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important;
+.final-dinner-card>img,.day1-card>.restaurant-img{
+ display:block!important;width:100%!important;height:330px!important;min-height:330px!important;max-height:330px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important;
 }
 @media(max-width:759px){
- .trip-detail-card>img,.final-dinner-card>img,.day1-card>.restaurant-img{
-   height:220px!important;min-height:220px!important;max-height:220px!important;
+ .itinerary-restaurant-card .restaurant-img,.restaurant-card .restaurant-img,.timeline .restaurant .restaurant-img,
+ .final-dinner-card>img,.day1-card>.restaurant-img{
+   height:220px!important;min-height:220px!important;max-height:220px!important;aspect-ratio:auto!important;width:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;
  }
 }
 `;
