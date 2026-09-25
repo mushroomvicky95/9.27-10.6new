@@ -101,10 +101,27 @@ function dedupDay6InfoCards(){
   });
 }
 
+
+function fixDay9PhotoSize(){
+  const timelines=[...document.querySelectorAll('.timeline')];
+  const day9=timelines[8];
+  if(!day9)return;
+  day9.querySelectorAll('.itinerary-restaurant-card .restaurant-img,.trip-detail-card>img,.final-dinner-card>img,.restaurant-card .restaurant-img').forEach(img=>{
+    img.style.setProperty('height',innerWidth<=759?'165px':'190px','important');
+    img.style.setProperty('min-height',innerWidth<=759?'165px':'190px','important');
+    img.style.setProperty('max-height',innerWidth<=759?'165px':'190px','important');
+    img.style.setProperty('width','100%','important');
+    img.style.setProperty('object-fit','cover','important');
+    img.style.setProperty('object-position','center','important');
+    img.style.setProperty('display','block','important');
+  });
+}
+
 function run(){
   document.documentElement.dataset.travelAppVersion=VERSION;
   fixDay1Dinner();
   dedupDay6InfoCards();
+  fixDay9PhotoSize();
   dedupGenerated();
   dedupEvents();
   alignMobile();
