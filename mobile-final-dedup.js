@@ -86,49 +86,59 @@ function activeTimeline(){
 }
 
 function dedupDay6InfoCards(){
-  if(activeDayNumber()!==6)return;
-  const day6=activeTimeline();
-  if(!day6)return;
-  day6.classList.add('day6-dedup-applied');
+  // app.js creates the legacy .info-card.spot-detail; itinerary-spots.js creates
+  // the newer .itinerary-spot-detail. They can coexist in the same event, so
+  // always remove the legacy card when a richer detail card is present.
+  document.querySelectorAll('.event').forEach(ev=>{
+    const rich=[...ev.querySelectorAll(':scope > .event-card > .itinerary-spot-detail')];
+    if(!rich.length)return;
 
-  // app.js renders a compact .info-card.spot-detail and itinerary-spots.js
-  // adds the richer .itinerary-spot-detail for the same attraction. On Day 6
-  // keep the richer card and remove the older duplicate inside that event.
-  day6.querySelectorAll(':scope > .event').forEach(ev=>{
-    const rich=[...ev.querySelectorAll('.itinerary-spot-detail')];
-    if(rich.length){
-      const seen=new Set();
-      rich.forEach(card=>{
-        const h=card.querySelector('h4');
-        const key=norm(h?.textContent||card.textContent.slice(0,120));
-        if(seen.has(key))card.remove();else seen.add(key);
-      });
-      ev.querySelectorAll('.info-card.spot-detail').forEach(old=>old.remove());
-    }
+    const seen=new Set();
+    rich.forEach(card=>{
+      const title=card.querySelector('.spot-detail-head h4,.spot-detail-head h4,.spot-detail-head h4');
+      const key=norm(title?.textContent||card.textContent.slice(0,160));
+      if(seen.has(key))card.remove();else seen.add(key);
+    });
+
+    ev.querySelectorAll(':scope > .event-card > .info-card.spot-detail').forEach(old=>{
+      old.remove();
+    });
   });
 
-  // Also collapse duplicate standalone detail wrappers by their visible title.
-  const seenWrap=new Set();
-  day6.querySelectorAll(':scope > .trip-correction-wrap, :scope > .itinerary-restaurant-block').forEach(w=>{
-    const h=w.querySelector('.trip-detail-card h3,.restaurant-title h3,.spot-detail-head h4');
-    const key=norm(h?.textContent||'');
-    if(!key)return;
-    if(seenWrap.has(key))w.remove();else seenWrap.add(key);
+  // Remove duplicate standalone attraction/correction cards inside the same
+  // timeline by their displayed heading.
+  document.querySelectorAll('.timeline').forEach(t=>{
+    const seen=new Set();
+    t.querySelectorAll(':scope > .trip-correction-wrap .trip-place-detail, :scope > .trip-correction-wrap .trip-food-detail').forEach(card=>{
+      const h=card.querySelector('h3,h4');
+      const key=norm(h?.textContent||'');
+      if(!key)return;
+      if(seen.has(key)){
+        const wrap=card.closest('.trip-correction-wrap');
+        if(wrap)wrap.remove();else card.remove();
+      }else seen.add(key);
+    });
   });
 }
 
 function fixDay9PhotoSize(){
-  if(activeDayNumber()!==9)return;
-  const day9=activeTimeline();
+  // Day 9 is rendered as the active timeline. Its dessert/restaurant entries
+  // use .spot-photo (from spotInfo()), not .restaurant-img, so the previous
+  // selector could never resize the large square image shown on mobile.
+  const head=document.querySelector('.detail-head h2');
+  if(!/Day\\s*9\\b/i.test(head?.textContent||''))return;
+  const day9=document.querySelector('.timeline');
   if(!day9)return;
-  // Day 1's actual mobile restaurant card uses a 220px photo. Match that
-  // exact height for every Day 9 restaurant card.
-  day9.querySelectorAll('.itinerary-restaurant-card .restaurant-img, .restaurant-card .restaurant-img, .restaurant .restaurant-img, .final-dinner-card img, .trip-detail-card.trip-food-detail img').forEach(img=>{
-    const h=innerWidth<=759?'220px':'330px';
+
+  const mobile=innerWidth<=759;
+  const h=mobile?'220px':'310px';
+
+  day9.querySelectorAll('.spot-photo, .itinerary-restaurant-card .restaurant-img, .restaurant-card .restaurant-img, .restaurant .restaurant-img, .final-dinner-card img, .trip-detail-card.trip-food-detail img').forEach(img=>{
     img.style.setProperty('height',h,'important');
     img.style.setProperty('min-height',h,'important');
     img.style.setProperty('max-height',h,'important');
     img.style.setProperty('width','100%','important');
+    img.style.setProperty('aspect-ratio','auto','important');
     img.style.setProperty('object-fit','cover','important');
     img.style.setProperty('object-position','center','important');
     img.style.setProperty('display','block','important');
@@ -149,17 +159,20 @@ function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queu
 const css=document.createElement('style');
 css.id='restaurant-photo-size-unify-20260926';
 css.textContent=`
-/* Day 9 restaurant-detail photos match Day 1 restaurant cards */
-.final-dinner-card>img,.day1-card>.restaurant-img{
- display:block!important;width:100%!important;height:330px!important;min-height:330px!important;max-height:330px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important;
+/* Day 9 restaurant/detail photos match Day 1 mobile restaurant geometry */
+.spot-photo,.final-dinner-card>img,.day1-card>.restaurant-img{
+ display:block!important;width:100%!important;height:310px!important;min-height:310px!important;max-height:310px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important;
 }
 @media(max-width:759px){
- .itinerary-restaurant-card .restaurant-img,.restaurant-card .restaurant-img,.timeline .restaurant .restaurant-img,
+ .spot-photo,.itinerary-restaurant-card .restaurant-img,.restaurant-card .restaurant-img,.timeline .restaurant .restaurant-img,
  .final-dinner-card>img,.day1-card>.restaurant-img{
    height:220px!important;min-height:220px!important;max-height:220px!important;aspect-ratio:auto!important;width:100%!important;object-fit:cover!important;object-position:center!important;display:block!important;
  }
-}
-`;
+ .event .info-card.spot-detail:has(+ .itinerary-spot-detail),
+ .event .info-card.spot-detail:has(~ .itinerary-spot-detail){
+   display:none!important;
+ }
+}`;
 if(!document.getElementById(css.id))document.head.appendChild(css);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
 new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
