@@ -5,3 +5,73 @@
 /* FINAL MOBILE DAY 9 SPOT PHOTO SIZE */
 .spot-photo{display:block!important;width:100%!important;height:310px!important;min-height:310px!important;max-height:310px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important}
 @media(max-width:759px){.spot-photo{display:block!important;width:100%!important;height:220px!important;min-height:220px!important;max-height:220px!important;aspect-ratio:auto!important;object-fit:cover!important;object-position:center!important}}
+
+
+/* ===== MIZUIRO / SORAIRO YOUTHFUL JAPANESE SUMMER THEME ===== */
+:root{
+ --mizuiro:#BFE4E0;
+ --mizuiro-deep:#8CCFCB;
+ --sora:#9FD2DE;
+ --sky:#85C3DA;
+ --misora:#6698CE;
+ --ink:#29465B;
+ --ink-soft:#5E7B8A;
+ --paper:#F5FBFC;
+ --surface:#FFFFFF;
+ --line:#D8EAF0;
+ --wash:#EAF6F8;
+ --accent:#477FB6;
+ --accent-dark:#35699D;
+ --accent-light:#E3F3F6;
+ --mint:#DDF2EE;
+}
+html,body,#app{background:var(--paper)!important;color:var(--ink)!important}
+body{background:linear-gradient(180deg,#EAF7F8 0%,#F5FBFC 35%,#F5FBFC 100%)!important}
+.hero{background:linear-gradient(115deg,#BFE4E0 0%,#9FD2DE 38%,#85C3DA 68%,#6698CE 100%)!important;color:#173E5B!important;box-shadow:0 5px 22px #477FA622!important;border-bottom:1px solid #ffffff88}
+.hero h1{color:#173E5B!important;text-shadow:0 1px 0 #ffffff55}
+.hero p,.hero-small{color:#294F69!important;opacity:1!important}
+.pill{background:#ffffff70!important;color:#244C66!important;border:1px solid #ffffff80}
+.content{background:transparent!important}
+.notice{background:#E6F5F3!important;border-color:#BFE4E0!important;color:#356F7A!important}
+.section-title h2,.detail-head h2{color:#294F69!important}
+.small,.date{color:#668394!important}
+.day-card,.event-card,.info-card,.flight,.faq,.restaurant,.spot-card,.choice{background:#FFFFFFF2!important;border-color:var(--line)!important;box-shadow:0 5px 20px #4A89AD12!important}
+.day-card:active,.spot-card:active{background:#F0FAFC!important}
+.day-no,.dot{background:linear-gradient(145deg,#8CCFCB,#6698CE)!important;color:#fff!important;box-shadow:0 3px 9px #6698CE22}
+.arrow{color:#6698CE!important}
+.back{background:#FFFFFF!important;color:#477FB6!important;border:1px solid var(--line)!important}
+.timeline:before{background:#BFE4E0!important}
+.time,.region-block h3{color:#477FB6!important}
+.event-card h3,.info-card h3,.day-main h3,.spot-card h4,.restaurant-title h3{color:#29465B!important}
+.event-card p,.info-card p,.info-card li,.day-main p,.spot-card p,.restaurant .desc,.restaurant .jp,.choice p{color:#617B89!important}
+.tag{background:#EAF4F7!important;color:#50778E!important}
+.tag.orange{background:#FFF1D8!important;color:#956A28!important}
+.choice{border-left-color:#85C3DA!important;background:#FDFEFF!important}
+.tabs{background:#F9FDFEF5!important;border-top:1px solid #D8EAF0!important;box-shadow:0 -5px 20px #477FA610!important;backdrop-filter:blur(12px)}
+.tab{color:#72909F!important}
+.tab.active{color:#477FB6!important}
+.check-head{background:#E5F3F7!important;border-color:#6698CE!important;color:#35699D!important}
+.checklist{border-color:#6698CE!important}
+.check-item{border-bottom-color:#E0EDF1!important}
+.check-item input:checked{background:#6698CE!important;border-color:#6698CE!important}
+.route{color:#477FB6!important}
+.route b{color:#8BA5B1!important}
+.flight li,.faq p{color:#617B89!important}
+.faq-search{background:#FFFFFF!important;border-color:#D8EAF0!important;color:#29465B!important}
+.faq button{background:#FFFFFF!important;color:#29465B!important}
+.filter{background:#FFFFFF!important;border-color:#D8EAF0!important;color:#5E7B8A!important}
+.filter.active{background:#6698CE!important;color:#fff!important;border-color:#6698CE!important}
+.category{background:#E5F3F7!important;color:#477FB6!important}
+.address{background:#F0F7F9!important;color:#617B89!important}
+.map-btn{background:linear-gradient(110deg,#8CCFCB,#6698CE)!important;color:#fff!important}
+.web-btn{background:#EAF4F7!important;color:#477FB6!important}
+.photo-badge{color:#477FB6!important;background:#EAF6F8!important;border-color:#C7E5EC!important}
+.restaurant-img{background:#D9EDF2!important}
+.empty{color:#7895A3!important}
+@media(max-width:759px){
+ .hero{padding:24px 18px 20px!important}
+ .content{padding-left:13px!important;padding-right:13px!important}
+ .day-card{border-radius:20px!important}
+ .tabs{height:76px!important}
+ .restaurant-body{background:#fff!important}
+}
