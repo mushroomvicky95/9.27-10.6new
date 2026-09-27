@@ -8,7 +8,10 @@ const REGIONS=['福岡','霧島','櫻島','鹿兒島市區'];
 const ITIN_RESTAURANTS=['博多もつ鍋 前田屋','前田屋','水たき 長野','NOOICE tenjin','いくら博多店','manu coffee 大名店','やりうどん福岡店','みやま本舗','焼肉なべしま','櫻島市場食堂','お食事処海月','鹿兒島屋台村','かごっまふるさと屋台村','めっけもん','新港食堂','大衆酒場かどや','かどや','とりくら','豚とろ','danken COFFEE','可否三昧','Voila Coffee','くじらcafé','うなぎの末よし','Café Cochi','天文館むじゃき本店','ざぼんラーメン','いちにいさん','Gyudo!'];
 const SHOPPING=[
  {region:'福岡',name:'上久醬油／ジョーキュウ醤油 小売館',jp:'ジョーキュウ醤油 小売館',desc:'福岡・大名一帶的老舖醬油選物，可作為伴手禮與調味料採購。',address:'福岡県福岡市中央区大名1-12-15',hours:'以店家當日公告為準',phone:'店家最新資料請以Google Maps確認'},
- {region:'福岡',name:'ニシナ屋珈琲 大名1-3-26niR焙煎所',jp:'ニシナ屋珈琲 大名1-3-26niR焙煎所',desc:'大名現場焙煎咖啡豆專門店，適合購買精品咖啡豆。',address:'福岡県福岡市中央区大名1-3-26',hours:'10:00–18:00',phone:'092-718-7379'}
+ {region:'福岡',name:'ニシナ屋珈琲 大名1-3-26niR焙煎所',jp:'ニシナ屋珈琲 大名1-3-26niR焙煎所',desc:'大名現場焙煎咖啡豆專門店，適合購買精品咖啡豆。',address:'福岡県福岡市中央区大名1-3-26',hours:'10:00–18:00',phone:'092-718-7379'},
+ {region:'福岡',name:'Beauty shop SEAM｜SEAM FUKUOKA',jp:'SEAM FUKUOKA（美容室専売品セレクトショップ）',desc:'天神大名的沙龍專業美髮／美容選品店，主打正規沙龍專用髮品與護理品牌；可只購買商品、不必接受美髮服務。適合採購日本沙龍級洗髮精、護髮、造型與頭皮護理產品。',address:'福岡県福岡市中央区大名2丁目1-53 BPRスクエア天神大名 1F',hours:'週一至週六 10:00–19:00；週日 10:00–18:00',phone:'官方頁面列預約／店舖聯絡資訊；請以官方網站確認',url:'https://seam.site/salon-fukuoka',note:'官方店舖資料：西鐵天神站步行約5分鐘；可免稅（消費滿¥5,000，需出示護照），免稅條件以店家最新公告為準。',img:'https://seam.site/assets/images/fukuoka/main.jpg'},
+ {region:'福岡',name:'ミーナ天神｜Mina Tenjin',jp:'ミーナ天神',desc:'天神北側大型購物商場，集合UNIQLO、GU、Loft、Nitori Express、Seria、ABC-MART、松本清等服飾、生活雜貨與藥妝店，適合一次採買日常用品與伴手禮。',address:'福岡市中央区天神4丁目3番8号',hours:'B1F 7:00–22:00；1F–6F 10:00–20:00；7F 10:00–21:00；8F／RF 10:00–22:00（部分店舖不同）',phone:'商場資訊請洽官方網站',url:'https://www.mina-tenjin.com/shop/',note:'福岡市地下鐵空港線「天神站」步行約3分鐘。各店營業時間可能不同，請以官方商場資訊為準。',img:'https://www.mina-tenjin.com/wp-content/themes/mina/assets/images/ogp.jpg'},
+ {region:'福岡',name:'福岡PARCO',jp:'福岡パルコ（Fukuoka PARCO）',desc:'位於天神中心的時尚購物商場，涵蓋服飾、潮流選物、化妝品、動漫周邊、生活雜貨及餐飲。美妝可留意本館5F Urban Comfort，另有多間潮流及角色商品店。',address:'福岡県福岡市中央区天神2丁目11-1',hours:'全館 10:00–20:30；餐廳樓層及部分店舖營業時間不同',phone:'092-235-7000',url:'https://fukuoka.parco.jp/',note:'位於天神站直結區域；官方商店清單及樓層資訊可查詢各品牌位置。',img:'https://parco.jp/fukuoka/images/ogp.jpg'}
 ];
 let detailRegion=null, detailCat=null, flexRestaurants=[];
 
