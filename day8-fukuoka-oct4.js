@@ -35,7 +35,7 @@ function restaurantCard(p){
 }
 function placeCard(p){
  if(p.noDetail)return '';
- return '<div class="day8-place-detail day8-rich-detail"><div class="day8-detail-title"><span>'+esc(p.tag||'行程資料')+'</span></div><div class="day8-detail-desc">'+esc(p.desc)+'</div><div class="day8-place-meta"><b>📍 地址</b><br>'+esc(p.address)+'</div>'+(p.hours?'<div class="day8-place-meta"><b>🕐 營業／開放時間</b><br>'+esc(p.hours)+'</div>':'')+(p.phone?'<div class="day8-place-meta"><b>☎️ 電話</b><br>'+esc(p.phone)+'</div>':'')+(p.transport?'<div class="day8-place-meta day8-transport"><b>🚶 交通安排</b><br>'+esc(p.transport).replace(/\n/g,'<br>')+'</div>':'')+(p.sub?'<div class="day8-place-meta"><b>ℹ️ 補充</b><br>'+esc(p.sub)+'</div>':'')+'<a class="map-btn" href="'+maps(p.title,p.address)+'" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div>';
+ return '<div class="day8-place-detail day8-rich-detail">'+(p.img?'<img class="day8-place-photo" src="'+esc(p.img)+'" alt="'+esc(p.title)+' 店舖／商品照片" loading="lazy" onerror="this.style.display=\'none\'">':'')+'<div class="day8-detail-title"><span>'+esc(p.tag||'行程資料')+'</span></div><div class="day8-detail-desc">'+esc(p.desc)+'</div><div class="day8-place-meta"><b>📍 地址</b><br>'+esc(p.address)+'</div>'+(p.hours?'<div class="day8-place-meta"><b>🕐 營業／開放時間</b><br>'+esc(p.hours)+'</div>':'')+(p.phone?'<div class="day8-place-meta"><b>☎️ 電話</b><br>'+esc(p.phone)+'</div>':'')+(p.transport?'<div class="day8-place-meta day8-transport"><b>🚶 交通安排</b><br>'+esc(p.transport).replace(/\n/g,'<br>')+'</div>':'')+(p.sub?'<div class="day8-place-meta"><b>ℹ️ 補充</b><br>'+esc(p.sub)+'</div>':'')+'<a class="map-btn" href="'+maps(p.title,p.address)+'" target="_blank" rel="noopener noreferrer">📍 Google Maps 導航</a></div>';
 }
 function renderDay8(){
  const head=document.querySelector('.detail-head h2');
@@ -52,6 +52,8 @@ const style=document.createElement('style');
 style.textContent=`
 .day8-hotel-card{background:#fff;border:1px solid #b9e5dc;border-radius:14px;padding:11px 12px;margin-top:10px;box-shadow:0 3px 12px rgba(20,50,50,.05);color:#59666c;font-size:12px}.day8-hotel-title{font-size:16px;font-weight:800;color:#26343b;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.day8-hotel-title span{font-size:11px;color:#087f73;background:#eff8f5;border-radius:999px;padding:4px 7px;white-space:nowrap}.day8-rich-detail{background:#f7f8f6;border:1px solid #e3ebe8;border-radius:14px;padding:12px 13px;margin-top:10px;line-height:1.55;color:#59666c;font-size:12px}.day8-detail-title{margin-bottom:7px}.day8-detail-title span{display:inline-flex;background:#eaf8f5;color:#087f73;border-radius:999px;padding:4px 8px;font-weight:800}.day8-detail-desc{font-size:12px;line-height:1.6;color:#66747a;margin-bottom:9px}.day8-transport{background:#eef7f5!important;border-left:3px solid #087f73}.day8-main-desc{margin-bottom:9px}
 .day8-place-detail .day8-place-meta{margin-bottom:7px}
+.day8-place-photo{display:block;width:100%;max-height:250px;object-fit:cover;border-radius:11px;margin:0 0 10px}
+@media(max-width:700px){.day8-place-photo{max-height:210px}}
 .day8-place-detail .map-btn{display:inline-flex;margin-top:5px;text-decoration:none;background:#087f73;color:#fff;padding:8px 11px;border-radius:9px}
 .day8-oct4-restaurant{margin-top:12px;border:1px solid #dfe9e6;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.06)}
 .day8-oct4-restaurant .restaurant-img{width:100%;height:230px;object-fit:cover;display:block}
