@@ -75,3 +75,24 @@ body{background:linear-gradient(180deg,#EAF7F8 0%,#F5FBFC 35%,#F5FBFC 100%)!impo
  .tabs{height:76px!important}
  .restaurant-body{background:#fff!important}
 }
+
+
+/* Embedded hotel card: Day 4-7 Toyoko Inn Kagoshima Chuo Station East Exit */
+.embedded-hotel-card{margin-top:14px;background:#F7FCFD;border:1px solid #BFE4E0;border-radius:22px;padding:18px;box-shadow:0 6px 20px #477FA610}
+.embedded-hotel-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.embedded-hotel-head h3{margin:6px 0 3px;color:#29465B;font-size:21px}
+.embedded-hotel-jp{color:#668394;font-size:12px}
+.embedded-hotel-head>span{background:#E3F3F6;color:#477FB6;border-radius:999px;padding:6px 9px;font-size:11px;font-weight:800;white-space:nowrap}
+.embedded-hotel-badge{display:inline-block;background:#BFE4E0;color:#35699D;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800}
+.embedded-hotel-card>p{color:#617B89;line-height:1.7;font-size:13px;margin:10px 0}
+.embedded-hotel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.embedded-hotel-grid>div{background:#FFFFFF;border:1px solid #D8EAF0;border-radius:13px;padding:10px 11px;color:#617B89;font-size:12px;line-height:1.55}
+.embedded-hotel-grid b{color:#477FB6}
+.embedded-hotel-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.embedded-hotel-actions .trip-map-btn,.embedded-hotel-actions .trip-web-btn{margin-top:0}
+@media(max-width:759px){
+ .embedded-hotel-card{padding:14px;border-radius:19px}
+ .embedded-hotel-head h3{font-size:19px}
+ .embedded-hotel-grid{grid-template-columns:1fr}
+ .embedded-hotel-grid>div{font-size:12px}
+}
