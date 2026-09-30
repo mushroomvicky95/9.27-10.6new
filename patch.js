@@ -50,7 +50,7 @@ style.textContent=`
 `;
 document.head.appendChild(style);
 
-const itineraryRestaurants=['博多もつ鍋 前田屋','前田屋','水たき 長野','NOOICE tenjin','いくら博多店','manu coffee 大名店','やりうどん福岡店','みやま本舗','焼肉なべしま','櫻島市場食堂','お食事処海月','鹿兒島屋台村','めっけもん','新港食堂','大衆酒場かどや','かどや','とりくら','豚とろ','danken COFFEE','可否三昧','Voila Coffee','くじらcafé','うなぎの末よし','Café Cochi','天文館むじゃき本店','ざぼんラーメン','いちにいさん','Gyudo!'];
+const itineraryRestaurants=['博多もつ鍋 前田屋','前田屋','水たき 長野','NOOICE tenjin','いくら博多店','manu coffee 大名店','やりうどん福岡店','櫻島市場食堂','お食事処海月','鹿兒島屋台村','めっけもん','新港食堂','大衆酒場かどや','かどや','とりくら','豚とろ','danken COFFEE','可否三昧','Voila Coffee','くじらcafé','うなぎの末よし','Café Cochi','天文館むじゃき本店','ざぼんラーメン','いちにいさん','Gyudo!'];
 const duplicateKeys=itineraryRestaurants.map(norm);
 function norm(s){return String(s||'').replace(/\s+/g,'').toLowerCase()}
 function isFlexPage(){const active=[...document.querySelectorAll('.tab.active span')].some(s=>s.textContent.trim()==='彈性');return active||!!document.querySelector('.filter-row .filter.active')}
