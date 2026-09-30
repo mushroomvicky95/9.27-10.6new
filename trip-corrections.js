@@ -64,7 +64,7 @@ function run(){
    if(!canShow||/退房/.test(title))return;
    if(t.includes('Richmond Hotel Tenjin Nishidori'))addLodging(e,lodging['Richmond Hotel Tenjin Nishidori']);
    else if(t.includes('霧島観光ホテル'))addLodging(e,lodging['霧島観光ホテル']);
-   else if(t.includes('東横INN鹿児島中央駅東口'))addLodging(e,lodging['東横INN鹿児島中央駅西口']);
+   else if(t.includes('東横INN鹿児島中央駅東口'))addLodging(e,lodging['東横INN鹿児島中央駅東口']);
  });
  const dinnerEvent=leafEvent('天神晚餐');
  if(dinnerEvent&&!dinnerEvent.dataset.dinnerFixed){dinnerEvent.dataset.dinnerFixed='1';const wrap=document.createElement('div');wrap.className='trip-correction-wrap trip-dinner-grid';wrap.innerHTML=dinners.map(cardHTML).join('');dinnerEvent.insertAdjacentElement('afterend',wrap)}
