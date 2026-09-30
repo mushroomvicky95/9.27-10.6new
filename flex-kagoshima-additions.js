@@ -11,6 +11,10 @@ const EXTRA=[
 {region:'鹿兒島市區',names:['Beer Shop 二軒目','SANKAKU BEER WORKS'],jp:'Beer Shop 二軒目｜SANKAKU BEER WORKS',cat:'酒類',desc:'鹿兒島中央站附近的精釀啤酒 taproom＋餐廳＋瓶裝店，為SANKAKU BEER WORKS直營店。',menu:'自家精釀啤酒、8款tap beer、葡萄酒、燒酎；17:00後提供鹿兒島食材季節料理',address:'〒890-0052 鹿児島県鹿児島市上之園町18-1 共研ビル1F',hours:'13:00–17:00；17:00–23:00（Food LO 22:00／Drink 22:30）；Bottle Shop 13:00–22:00；週四休',phone:'070-8360-1606',img:'https://s3-ap-northeast-1.amazonaws.com/public-my-beer-2/uploads/rating/image/12001/a554b4d8-d8a9-4b5f-83f2-feedaeec0142.jpeg',note:'實際SANKAKU BEER WORKS精釀啤酒照片；2026年資料確認二軒目為直營taproom。'},
 {region:'鹿兒島市區',names:['Fruits & Gelato Sakurajima','フルーツ＆ジェラートさくらじま'],jp:'フルーツ＆ジェラートさくらじま',cat:'咖啡甜點類',desc:'鹿兒島中央站附近的水果專門店甜點店，以新鮮水果製作Gelato、水果聖代與水果甜點。',menu:'水果聖代、季節水果Gelato、芒果／梅子／百香果等水果口味、蘋果派、Mix Pie',address:'〒890-0045 鹿児島県鹿児島市武2-31-23',hours:'09:00–18:30；聖代等部分品項約18:00截止（出發前確認）',phone:'099-259-0665',img:'https://tblg.k-img.com/restaurant/images/Rvw/69564/640x640_rect_69564196.jpg',note:'實際水果聖代照片；官方鹿兒島旅遊資料亦介紹其水果雪酪與水果聖代。'}
 ];
+EXTRA.push(
+{region:'鹿兒島市區',names:['みやま本舗 霧島店','みやま本舗'],jp:'みやま本舗 霧島店',cat:'咸食／地雞料理',desc:'原 Day 4 晚餐候選，現移至彈性頁鹿兒島區。霧島在地地雞料理店，適合想吃黑薩摩雞與雞刺身時選擇。',menu:'溶岩焼き5種盛り、鶏刺し2色盛り、黒さつま鶏焼き、鶏のたたき、鶏めし。',address:'鹿児島県霧島市霧島田口1611-10',hours:'以店家最新公告為準；常見資料列午餐11:00–15:00，晚餐時段請先確認',phone:'0995-57-0201',img:'https://cf-tp.furunavi.jp/travel/plan/9608/2/original/gi7zjspl.jpg',note:'原 Day 4 晚餐選項；已從主行程移至彈性頁鹿兒島區。'},
+{region:'鹿兒島市區',names:['焼肉なべしま 鹿児島インター店','焼肉なべしま'],jp:'焼肉なべしま 鹿児島インター店',cat:'咸食／燒肉',desc:'原 Day 4 晚餐候選，現移至彈性頁鹿兒島區。鹿兒島在地燒肉選項，可吃國產牛、豬、雞及沙律吧。',menu:'鹿兒島／國產牛燒肉、各式牛豬雞肉、沙律吧及套餐。',address:'〒890-0045 鹿児島市武2丁目16-10',hours:'11:00–15:00（LO14:30）／17:00–21:30（LO21:00）；12/31、1/1休',phone:'099-258-4334',img:'https://images.miil.me/j/c082eadc-3c13-11ef-98b6-0ac00af22b69.orig.jpg',note:'原 Day 4 晚餐選項；已從主行程移至彈性頁鹿兒島區。'}
+);
 window.__flexExtraRestaurants=EXTRA;
 const nativeFetch=window.fetch.bind(window);
 window.fetch=function(input,init){
