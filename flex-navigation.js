@@ -18,6 +18,7 @@ let detailRegion=null, detailCat=null, flexRestaurants=[];
 function norm(s){return String(s||'').replace(/\s+/g,'').toLowerCase()}
 function duplicate(text,list){const n=norm(text);return list.some(x=>n.includes(norm(x))||norm(x).includes(n))}
 function regionOf(r){
+ if(REGIONS.includes(r.region))return r.region;
  const t=norm((r.name||'')+' '+(r.jp||'')+' '+(r.address||''));
  if(/福岡|天神|大名|博多|赤坂/.test(t))return '福岡';
  if(/霧島/.test(t))return '霧島';
