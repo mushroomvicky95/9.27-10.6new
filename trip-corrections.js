@@ -5,7 +5,7 @@ const MAP=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURICompone
 const lodging={
  'Richmond Hotel Tenjin Nishidori':{jp:'リッチモンドホテル天神西通',addr:'〒810-0001 福岡県福岡市中央区天神2-6-16',hours:'入住／退房依飯店當日規定',tel:'092-717-2477',desc:'位於福岡天神西通，距地下鐵天神站步行約3–5分鐘，Day 1–2 住宿。',map:MAP('Richmond Hotel Tenjin Nishidori, 2-6-16 Tenjin, Chuo Ward, Fukuoka')},
  '霧島観光ホテル':{jp:'AUBEGIO 霧島観光ホテル',addr:'〒899-6603 鹿児島県霧島市牧園町高千穂3885',hours:'入住／退房依飯店當日規定',tel:'0995-78-2531',desc:'霧島溫泉區住宿，主打溫泉與會席料理；行程 Day 3 晚上入住。',map:MAP('AUBEGIO Kirishima Kanko Hotel, 3885 Makizonochō Takachiho, Kirishima')},
- '東横INN鹿児島中央駅西口':{jp:'東横INN鹿児島中央駅西口',addr:'〒890-0046 鹿児島県鹿児島市西田2-28-10',hours:'Check-in 15:00／Check-out 10:00；免費早餐 6:30–9:00',tel:'099-814-1045',desc:'鹿兒島中央站西口步行約1分鐘，Day 4–7 連續住宿。設有付費停車場。',map:MAP('Toyoko Inn Kagoshima Chuo-eki Nishi-guchi, 2-28-10 Nishida, Kagoshima')}
+ '東横INN鹿児島中央駅東口':{jp:'東横INN鹿児島中央駅東口',addr:'〒890-0053 鹿児島県鹿児島市中央町26-25',hours:'Check-in 15:00／Check-out 10:00；免費早餐 6:30–9:00',tel:'099-813-1045',desc:'鹿兒島中央站東口步行約2分鐘，Day 4 晚至 Day 7 晚連續住宿。設有立體停車場及平面停車位。',map:'https://maps.app.goo.gl/8vViU2qwJbVZ5kXp7?g_st=ic'}
 };
 const dinners=[
  {name:'博多もつ鍋 前田屋 博多店',tag:'咸食／牛雜鍋',jp:'博多もつ鍋前田屋 博多店',desc:'以國產和牛內臟製作博多名物牛雜鍋；味噌、醬油、辛味三種鍋底可選。官方資料目前列味噌牛雜鍋為人氣餐點。',addr:'福岡市博多区博多駅前3-26-5',hours:'11:00–14:30（LO 14:00）／17:00–24:00（食事LO 23:00・飲物LO 23:30）',tel:'092-482-8558',photo:'https://cdn-ak.f.st-hatena.com/images/fotolife/v/v2133v/20191017/20191017212647.jpg',map:MAP('博多もつ鍋前田屋 博多店, 福岡市博多区博多駅前3-26-5')},
@@ -64,7 +64,7 @@ function run(){
    if(!canShow||/退房/.test(title))return;
    if(t.includes('Richmond Hotel Tenjin Nishidori'))addLodging(e,lodging['Richmond Hotel Tenjin Nishidori']);
    else if(t.includes('霧島観光ホテル'))addLodging(e,lodging['霧島観光ホテル']);
-   else if(t.includes('東横INN鹿児島中央駅西口'))addLodging(e,lodging['東横INN鹿児島中央駅西口']);
+   else if(t.includes('東横INN鹿児島中央駅東口'))addLodging(e,lodging['東横INN鹿児島中央駅西口']);
  });
  const dinnerEvent=leafEvent('天神晚餐');
  if(dinnerEvent&&!dinnerEvent.dataset.dinnerFixed){dinnerEvent.dataset.dinnerFixed='1';const wrap=document.createElement('div');wrap.className='trip-correction-wrap trip-dinner-grid';wrap.innerHTML=dinners.map(cardHTML).join('');dinnerEvent.insertAdjacentElement('afterend',wrap)}
